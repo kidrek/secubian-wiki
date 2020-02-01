@@ -10,9 +10,19 @@ Pour chacun des outils ci-dessous, gardez bien à l'esprit que le temps de prél
 Il est recommandé lors d'une investigation d'exécuter ce type d'outil à partir d'un périphérique amovible afin de ne pas compromettre la récupération de données sur les périphériques de stockage.
 
 ```
-winpmem.exe windows_memory.dmp
+dumpit.exe /Q /O memory_dump.raw
 ```
 
+## FTK imager
+
+\\
+Source : https://accessdata.com/product-download
+
+## Magnet Forensics
+
+Magnet fournit un outil gratuit permettant de prélever la mémoire vive de système. Il est compatible sur les systèmes suivants : Windows XP, Vista, 7, 8, 10, 2003, 2008, 2012 (32 and 64 bit support)
+\\
+Source : https://www.magnetforensics.com/resources/magnet-ram-capture/
 
 ## Winpmem
 Winpmem est un outil exécuté en ligne de commande.\\
