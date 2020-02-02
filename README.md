@@ -33,11 +33,12 @@ Secuip, Kidrek
 
 # a2dissite 000-default
 # a2ensite 000-secubian-wiki
+# /etc/init.d/apache2 restart
 ```
 
 ## Déploiement du wiki
 
 ```
-# git clone https://github.com/kidrek/secubian-wiki.git /var/www/
+# git clone https://github.com/kidrek/secubian-wiki.git /var/www/secubian-wiki/
 # chown -R www-data:www-data /var/www/secubian-wiki
 ```
