@@ -1,8 +1,10 @@
 # Forensic Windows - Mémoire Vive
+La mémoire vive contient un grand nombre d'informations indispensables lors d'une investigation numérique. En l'analysant, il sera ainsi possible d'identifier les processus en cours d'exécution ou terminés, des créations/suppressions de fichiers, et même des connexions réseaux. 
 
 # 1. Prélévement de la mémoire vive 
 
-Pour chacun des outils ci-dessous, gardez bien à l'esprit que le temps de prélévement dependra toujours de la mémoire vive installé.
+Voici quelques outils disponibles gratuitement sur internet qui vous permettront d'effectuer une extraction de la mémoire vive du système visé.
+Pour chacun des outils ci-dessous, gardez bien à l'esprit que le temps de prélévement, et la taille du dump dépendront de la mémoire vive installée.
 
 ## DumpIt
 
