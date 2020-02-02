@@ -1,5 +1,5 @@
 data/cache/
-data/index/*.idx
+data/index/
 data/attic/
 data/media_attic/
 data/meta/
