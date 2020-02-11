@@ -3,25 +3,39 @@ La mémoire vive contient un grand nombre d'informations indispensables lors d'u
 
 # 1. Prélévement de la mémoire vive 
 
-Voici quelques outils disponibles gratuitement sur internet qui vous permettront d'effectuer une extraction de la mémoire vive du système visé.
-Pour chacun des outils ci-dessous, gardez bien à l'esprit que le temps de prélévement, et la taille du dump dépendront de la mémoire vive installée.
+
+Il existe de nombreux moyens d'accéder au contenu de la mémoire vive, \\
+tout d'abord de manière passive en analysant des fichiers générés par le système d'exploitation :
+
+* **%SystemDrive%**\hiberfile.sys** : Ce fichier nommé fichier d'hibernation va stocker le contenu de la mémoire vive lorsque le système d'exploitation activera le mode veille prolongée. Le dump ne sera pas exploitable directement, car son contenu est compressé. Volatility offre toutefois la possibilité de le convertir.
+
+```
+root@kali# volatility -f ../hiberfile.sys imagecopy -O hiberfile.raw
+```
+
+
+* **%SystemDrive%**\pagefile.sys** : 
+* **%SystemDrive%**\swapfile.sys** : Uniquement présent sur les systèmes d'exploitation depuis les versions Win8/Win2012
+* **%WINDIR\MEMORY.DMP** : correspond aux crash dump du système d'exploitation windows. Il est nécessaire comme pour le fichier ```hiberfile.sys``` d'utiliser le plugin ```imagecopy``` de Volatility afin de rendre exploitable ce type de dump mémoire.
+
+
+Ensuite, l'accès aux données de la mémoire vive peut s'effectuer via des outils de prélévements.
+Voici quelques outils disponibles gratuitement sur le web qui vous permettront d'effectuer une extraction de la mémoire vive du système visé.
+Pour chacun des outils ci-dessous, gardez bien à l'esprit que le temps de prélévement, et la taille du dump dépendront de la mémoire vive installée. Il est d'ailleurs recommandé lors d'une investigation d'exécuter ce type d'outil à partir d'un périphérique amovible afin de ne pas compromettre la récupération de données sur les périphériques de stockage.
 
 ## DumpIt
-
 \\
-Il est recommandé lors d'une investigation d'exécuter ce type d'outil à partir d'un périphérique amovible afin de ne pas compromettre la récupération de données sur les périphériques de stockage.
+Source : http://www.comae.io
 
 ```
 dumpit.exe /Q /O memory_dump.raw
 ```
 
 ## FTK imager
-
 \\
 Source : https://accessdata.com/product-download
 
 ## Magnet Forensics
-
 Magnet fournit un outil gratuit permettant de prélever la mémoire vive de système. Il est compatible sur les systèmes suivants : Windows XP, Vista, 7, 8, 10, 2003, 2008, 2012 (32 and 64 bit support)
 \\
 Source : https://www.magnetforensics.com/resources/magnet-ram-capture/
@@ -34,8 +48,34 @@ Il est recommandé lors d'une investigation d'exécuter ce type d'outil à parti
 winpmem.exe windows_memory.dmp
 ```
 
+# 2. Extraction de la RAM provenant de machines virtuelles
 
-# 2. Analyse de la mémoire vive
+Les machines virtuelles fonctionnent différemment des machines physiques. Les ressources matérielles sont virtualisées et leurs données sont ainsi stockées dans des fichiers sur le périphérique de stockage de l'hyperviseur.
+
+On peut ainsi obtenir très facilement les dumps de mémoire et ce pour la plupart des technologies de virtualisation.
+
+## VMware (Fusion/Workstation/Server/Player)
+
+VMware utilise les fichiers : 
+
+* **VMEM**, qui correspond à une image brute de la RAM
+* **VMSS** et **VMSN** pour stocker une image de la mémoire vive.
+
+Pour l'analyse d'un Windows2016, il est nécessaire d'avoir les deux fichiers ```.vmem``` et ```.vmss``` au sein du même repertoire pour pouvoir effectuer l'analyse avec volatility sur le fichier ```.vmem```.
+
+
+## Microsoft Hyper-v
+Sous Microsoft Hyper-v, l'accès à la mémoire s'effectue au sein des fichiers ```.bin``` correspondant à l'image de la mémoire, et le fichier ```.vsv```.
+
+## Parallels
+Parallels stocke quant à lui le contenu de la RAM dans le fichier ```.mem``` des machines virtuelles.
+
+## VirtualBox
+VirtualBox n'a pas le même fonctionnement que les autres technologies.
+Une partie de la mémoire est présente dans le fichier ```.sav``` des machines virtuelles. S'il est nécessaire d'obtenir l'intégralité du contenu, nous devrons démarrer la mchine virtuelle en mode débogage, ou utiliser un des outils listés ci-dessus de prélévement.
+
+
+# 3. Analyse de la mémoire vive
 
 ## Volatility
 
@@ -252,3 +292,38 @@ Ensuite, nous pouvons les uploader sur la plateforme "Virustotal" afin d'obtenir
 {{ :forensic:volatility_malfind_virustotal.png?nolink |}}
 
 
+### Filescan - Lister les fichiers
+
+Si lors de l'analyse vous avez un doute sur un fichier ou binaire. Il est possible de parcourir la $MFT "Master File Table" afin d'obtenir son "physical offset" nécessaire pour son extraction future.
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 filescan
+```
+
+
+### Dumpfiles - Extraction de fichiers
+
+Grâce au plugin dumpfiles de Volatility, il est très facile d'extraire un fichier suspect d'un prélévement mémoire. 
+Comment fonctionne t'il?
+Il va parcourir la "Process Handle Table" et l'arbre "Virtual Adress Descriptor/VAD" à la recherche d'objet de type fichier "File_Objects". Une fois ces objets identifiés, le plugin analysera les 3 données "ImageSectionObject", "DataSectionObject" et "SharedCachedMap" nécessaire à l'extraction.
+
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 dumpfiles -n --dump-dir=./dumpfiles/
+```
+
+Une fois la commande terminée, les fichiers extraits seront disponibles dans le répertoire "./dumpfiles/".
+
+Voici quelques options utiles : 
+
+* **-n** : qui permet d'otbenir les fichiers extraits avec leur nom original
+* **-i** : n'utilise pas la casse pour effectuer la recherche
+* **-r** : permet d'utiliser une regex afin d'extraire par exemple des fichiers ayant la même extension
+
+Avec cette dernière option, il devient possible d'extraire des fichiers dont le nom correspond à une expression régulière.
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 dumpfiles -n -i -r \\.exe --dump-dir=./dumpfiles/
+```
+
+Le nom des fichiers extraits seront sous la forme ```file.[PID].[OFFSET].ext```.
