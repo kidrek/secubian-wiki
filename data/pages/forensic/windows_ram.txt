@@ -7,7 +7,7 @@ La mémoire vive contient un grand nombre d'informations indispensables lors d'u
 Il existe de nombreux moyens d'accéder au contenu de la mémoire vive, \\
 tout d'abord de manière passive en analysant des fichiers générés par le système d'exploitation :
 
-* **%SystemDrive%**\hiberfile.sys** : Ce fichier nommé fichier d'hibernation va stocker le contenu de la mémoire vive lorsque le système d'exploitation activera le mode veille prolongée. Le dump ne sera pas exploitable directement, car son contenu est compressé. Volatility offre toutefois la possibilité de le convertir.
+* **%SystemDrive%\hiberfile.sys** : Ce fichier nommé fichier d'hibernation va stocker le contenu de la mémoire vive lorsque le système d'exploitation activera le mode veille prolongée. Le dump ne sera pas exploitable directement, car son contenu est compressé. Volatility offre toutefois la possibilité de le convertir.
 
 ```
 root@kali# volatility -f ../hiberfile.sys imagecopy -O hiberfile.raw
