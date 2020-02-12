@@ -14,8 +14,8 @@ root@kali# volatility -f ../hiberfile.sys imagecopy -O hiberfile.raw
 ```
 
 
-* **%SystemDrive%**\pagefile.sys** : 
-* **%SystemDrive%**\swapfile.sys** : Uniquement présent sur les systèmes d'exploitation depuis les versions Win8/Win2012
+* **%SystemDrive%\pagefile.sys** : 
+* **%SystemDrive%\swapfile.sys** : Uniquement présent sur les systèmes d'exploitation depuis les versions Win8/Win2012
 * **%WINDIR\MEMORY.DMP** : correspond aux crash dump du système d'exploitation windows. Il est nécessaire comme pour le fichier ```hiberfile.sys``` d'utiliser le plugin ```imagecopy``` de Volatility afin de rendre exploitable ce type de dump mémoire.
 
 
