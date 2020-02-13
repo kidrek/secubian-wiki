@@ -79,14 +79,35 @@ Une partie de la mémoire est présente dans le fichier ```.sav``` des machines 
 
 ## Volatility
 
-Volatility est un outil opensource dédié à l'analyse de dump mémoire, multi OS.
-Il est ainsi possible d'analyser des dumps mémoire Microsoft Windows / Linux / macOS.
+Volatility est un outil opensource dédié à l'analyse de dump mémoire, multi OS, Microsoft Windows / Linux / macOS.
 
-https://github.com/volatilityfoundation/volatility
+Le code source est disponible : https://github.com/volatilityfoundation/volatility \\
+Un wiki reprenant les commandes est également disponible, ici : https://github.com/volatilityfoundation/volatility/wiki/Command-Reference
+
+Une fois déployé, l'outil s'utilise de la manière suivante : 
+
+```
+root@kali# volatility -f {image} --profile={profile} {plugins}
+```
+
+Pour faciliter l'utilisation de l'outil, il est possible de déclarer une variable d'environnement ```VOLATILITY_LOCATION=file://.....```.
+
+```
+root@kali# export VOLATILITY_LOCATION=file://mydump.img
+root@kali# volatility --profile={profile} {plugins}
+```
+
+Une fois l'analyse effectuée, la variable d'environnement pourra être supprimée en utilisant la commande ```unset```.
+
+```
+root@kali# unset VOLATILITY_LOCATION
+```
+
 
 ### kdbgscan - identification du profile
 
-Avant de débuter l'analyse d'un dump de mémoire vive, il est nécessaire de déterminer le profile correspondant à la version de son système d'exploitation.
+Chaque système d'exploitation structure différemment la mémoire utilisée
+Pour pouvoir analyser un dump de mémoire vive, il est impératif de déterminer le profile correspondant à la version de son système d'exploitation. Le plugin **kdbgscan** va parcourir le dump mémoire en testant certains profiles. Les résultats obtenus permettront de déterminer le profile adapté.
 
 ```
 root@kali# volatility -f ../JbossServer_memory.vmem kdbgscan
@@ -166,7 +187,10 @@ INFO    : volatility.debug    : Determining profile based on KDBG search...
 
 
 Une des premières action à mener lors d'une investigation numérique est de lister les processus afin d'identifier d'éventuels processus suspects.
-Plusieurs plugins sont disponibles (pslist, pstree, psxview, etc). J'ai une preference pour "pstree" qui organise les processus par lien de parenté.
+Chaque processus a son environnement propre nommé Process Environment Block (PEB). Y sont stockées les données telles que le chemin ou se trouve le binaire, les éventuels arguments ainsi que les DLLs nécessaires à son exécution. 
+
+Plusieurs plugins sont disponibles (pslist, pstree, psxview, etc). \\
+J'ai une preference pour "pstree" qui organise les processus par lien de parenté.
 
 ```
 root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 pstree
