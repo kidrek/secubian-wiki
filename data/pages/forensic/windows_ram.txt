@@ -199,6 +199,22 @@ INFO    : volatility.debug    : Determining profile based on KDBG search...
 ```
 ### 1. Identification de processus suspects
 
+Comment détecter un processus non légitimes ? \\
+Voici quelques actions à mener pour mettre en avant toutes incohérences : 
+
+* **Analyse du nom du processus :**
+ * S'agit-il d'un processus légitime ?
+ * A t-il un nom qui se rapproche d'un processus connu du système ?
+* **Analyse du chemin ou est stocké le binaire :**
+ * Est-il stocké au sein d'un répertoire accessible en écriture par tout le monde (ex: répertoire utilisateur / répertoire temporaire)
+* **Analyse du processus parent :**
+ * Est-il le parent attendu pour ce type de processus ?
+* **Analyse des différents arguments passés au processus**
+* **Analyse de l'heure à laquelle le processus a été exécuté :**
+ * Identification de modifications apportées au système
+  * Actions sur le système de fichiers (creation/suppression)
+  * Mise en place de moyens de persistence (création de services / taches planifiées)
+* **Analyse des droits associés à l'utilisateur ayant exécuté le binaire**
 
 
 #### pstree - lister les processus
