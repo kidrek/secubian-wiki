@@ -217,13 +217,111 @@ Voici quelques actions à mener pour mettre en avant toutes incohérences :
 * **Analyse des droits associés à l'utilisateur ayant exécuté le binaire**
 
 
-#### pstree - lister les processus
+
+Pour nous aider dans cette investigation, le SANS a publié quelques posters au format PDF disponibles à partir du répertoire **Documentation** présent sur le bureau de votre session utilisateur secubian.
+Voici quelques processus systèmes légitimes sur un système d'exploitation Microsoft Windows : 
+
+* **csrss.exe**
+ * Chemin : ```%systemroot%\system32\csrss.exe```
+ * Processus parent : smss.exe
+
+* **explorer.exe**
+ * Chemin : ```%systemroot%\explorer.exe```
+ * Processus parent : userinit.exe
+ * Nombre d'occurence : 1 instance par compte utilisateur connecté
+ * Utilisateur executant le processus : le compte utilisateur connecté
+
+* **lsaiso.exe**
+ * Chemin : ```%systemroot%\system32\lsaiso.exe```
+ * Processus parent : wininit.exe
+ * Nombre d'occurence : <= 1
+ * Utilisateur executant le processus : local system
+
+* **lsass.exe**
+ * Chemin : ```%systemroot%\system32\lsass.exe```
+ * Processus parent : wininit.exe
+ * Nombre d'occurence : 1
+ * Utilisateur executant le processus : local system
+
+* **runtimebroker.exe**
+ * Chemin : ```%systemroot%\system32\runtimebroker.exe```
+ * Processus parent : svchost.exe
+
+* **services.exe**
+ * Chemin : ```%systemroot%\system32\services.exe```
+ * Processus parent : wininit.exe
+ * Nombre d'occurence : 1
+
+* **smss.exe**
+ * Chemin : ```%systemroot%\system32\smss.exe```
+ * Processus parent : system
+
+* **svchost.exe**
+ * Chemin : ```%systemroot%\system32\svchost.exe```
+ * Processus parent : services.exe
+
+* **system**
+ * Chemin : 
+ * Processus parent : aucun
+ * Nombre d'occurence : 1
+
+* **taskhostw.exe**
+ * Chemin : ```%systemroot%\system32\taskhostw.exe```
+ * Processus parent : svchost.exe
+
+* **wininit.exe**
+ * Chemin : ```%systemroot%\system32\wininit.exe```
+ * Processus parent : smss.exe
+ * Nombre d'occurence : 1
+
+* **winlogon.exe**
+ * Chemin : ```%systemroot%\system32\winlogon.exe```
+ * Processus parent : smss.exe
+ * Utilisateur executant le processus : local system
+
+
+
+#### 1.1 Lister les processus
 
 Une des premières action à mener lors d'une investigation numérique est de lister les processus afin d'identifier d'éventuels processus suspects.
-Chaque processus a son environnement propre nommé Process Environment Block (PEB). Y sont stockées les données telles que le chemin ou se trouve le binaire, les éventuels arguments ainsi que les DLLs nécessaires à son exécution. 
+Chaque processus a son environnement propre nommé **Process Environment Block (PEB)**. Y sont stockées les données telles que le chemin ou se trouve le binaire, les éventuels arguments ainsi que les DLLs nécessaires à son exécution. 
 
-Plusieurs plugins sont disponibles (pslist, pstree, psxview, etc). \\
+Plusieurs plugins sont disponibles (pslist, pstree, etc). Ils vont ainsi parcourir la liste liant les structures **EPROCESS** de chacun des processus et les afficher à l'écran. \\
 J'ai une preference pour "pstree" qui organise les processus par lien de parenté.
+
+##### 1.1.1 Pslist
+
+Ce plugin comme évoqué ci-dessus va parcourir la liste liant les structures **EPROCESS** des processus. \\
+Il affichera entre autre en résultat :
+
+* le nom du processus (Name)
+* le processus ID (PID)
+* le processus ID de son processus parent (PPID)
+* le nombre de threads (Thds)
+* le nombre de Handle (Hnds)
+* l'heure de début de son exécution (Start)
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 pslist
+
+Offset(V)          Name                    PID   PPID   Thds     Hnds   Sess  Wow64 Start                          Exit                          
+------------------ -------------------- ------ ------ ------ -------- ------ ------ ------------------------------ ------------------------------
+0xffff9a0fd32ac040 System                    4      0    107        0 ------      0 2020-01-16 13:22:02 UTC+0000                                 
+0xffff9a0fd42ac040 smss.exe                364      4      2        0 ------      0 2020-01-16 13:22:02 UTC+0000                                 
+0xffff9a0fd43bd080 csrss.exe               472    460     11        0      0      0 2020-01-16 13:22:03 UTC+0000                                 
+0xffff9a0fd4dfc080 smss.exe                572    364      0 --------      1      0 2020-01-16 13:22:03 UTC+0000   2020-01-16 13:22:03 UTC+0000  
+0xffff9a0fd4e63080 wininit.exe             580    460      1        0      0      0 2020-01-16 13:22:03 UTC+0000                                 
+```
+
+
+Il est possible de n'afficher que les données d'un processus en particulier en utilisant le paramètre '-p' suivi du PID.
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 pslist -p 364
+```
+
+
+##### 1.1.2 Pstree
 
 ```
 root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 pstree
@@ -237,14 +335,40 @@ root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 
 ......... 0xffff9a0fd6162080:conhost.exe             5820   5812      1      0 2020-01-16 13:25:09 UTC+0000
 ......... 0xffff9a0fd4ae7080:rundll32.exe            5844   5812      1      0 2020-01-16 13:25:09 UTC+0000
 .......... 0xffff9a0fd6090080:rundll32.exe           5856   5844      2      0 2020-01-16 13:25:09 UTC+0000
-........ 0xffff9a0fd48bc080:cmd.exe                  5492   4168      1      0 2020-01-16 13:24:57 UTC+0000
-......... 0xffff9a0fd6122800:conhost.exe             5500   5492      1      0 2020-01-16 13:24:57 UTC+0000
-......... 0xffff9a0fd60fc800:rundll32.exe            5524   5492      1      0 2020-01-16 13:24:57 UTC+0000
-........ 0xffff9a0fd5910080:cmd.exe                  6056   4168      1      0 2020-01-16 13:25:15 UTC+0000
-......... 0xffff9a0fd5296080:rundll32.exe            3788   6056      1      0 2020-01-16 13:25:15 UTC+0000
-.......... 0xffff9a0fd528a500:rundll32.exe           3664   3788      2      0 2020-01-16 13:25:15 UTC+0000
-......... 0xffff9a0fd4ac3080:conhost.exe             6032   6056      1      0 2020-01-16 13:25:15 UTC+0000
 ```
+
+##### 1.1.3 Psscan
+
+Le plugin psscan utilise un procédé différent pour lister les processus. 
+Il va parcourir la mémoire à la recherche de structure **EPROCESS**. Cette méthode permettra notamment d'identifier des processus ayant été exécuté et désormais terminé.
+
+Il affichera entre autre en résultat :
+
+* le nom du processus (Name)
+* le processus ID (PID)
+* le processus ID de son processus parent (PPID)
+* l'heure de début de son exécution (Time created)
+* l'heure de fin d'exécution (Time exited)
+
+\\
+**La différence entre les résultats du plugins pslist et psscan permettra d'identifier potentiellement des processus tentant de se cacher et permettra d'orienter le reste de notre analyse.**
+
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 psscan
+
+Offset(P)          Name                PID   PPID PDB                Time created                   Time exited                   
+------------------ ---------------- ------ ------ ------------------ ------------------------------ ------------------------------
+0x00009a0fd32ac040 System                4      0 0x00000000001ab000 2020-01-16 13:22:02 UTC+0000                                 
+0x00009a0fd351b440 svchost.exe        2272    712 0x0000000121cf0000 2020-01-16 13:22:13 UTC+0000                                 
+0x00009a0fd46e4080 conhost.exe        3552   5760 0x00000000b8b61000 2020-01-16 14:01:47 UTC+0000   2020-01-16 14:01:48 UTC+0000  
+0x00009a0fd48bc080 cmd.exe            5492   4168 0x000000003b807000 2020-01-16 13:24:57 UTC+0000                                 
+0x00009a0fd491f080 svchost.exe        2024    712 0x0000000112dc5000 2020-01-16 13:22:05 UTC+0000                                 
+0x00009a0fd49de800 svchost.exe         348    712 0x0000000108bfc000 2020-01-16 13:22:04 UTC+0000                                 
+0x00009a0fd4a7f800 WmiPrvSE.exe       2472    808 0x0000000117bc6000 2020-01-16 13:22:06 UTC+0000                                 
+```
+
+Comme le plugin pslist, il est possible de n'afficher que les données d'un processus en particulier en utilisant le paramètre '-p' suivi du PID.
 
 
 #### Dlllist - Analyse des DLLs chargées par les processus
@@ -291,33 +415,6 @@ Flags: PrivateMemory: 1, Protection: 6
 0x00850001 5a               POP EDX
 0x00850002 e800000000       CALL 0x850007
 0x00850007 5b               POP EBX
-0x00850008 52               PUSH EDX
-0x00850009 45               INC EBP
-0x0085000a 55               PUSH EBP
-0x0085000b 89e5             MOV EBP, ESP
-0x0085000d 81c364130000     ADD EBX, 0x1364
-0x00850013 ffd3             CALL EBX
-0x00850015 81c395a80200     ADD EBX, 0x2a895
-0x0085001b 893b             MOV [EBX], EDI
-0x0085001d 53               PUSH EBX
-0x0085001e 6a04             PUSH 0x4
-0x00850020 50               PUSH EAX
-0x00850021 ffd0             CALL EAX
-0x00850023 0000             ADD [EAX], AL
-0x00850025 0000             ADD [EAX], AL
-0x00850027 0000             ADD [EAX], AL
-0x00850029 0000             ADD [EAX], AL
-0x0085002b 0000             ADD [EAX], AL
-0x0085002d 0000             ADD [EAX], AL
-0x0085002f 0000             ADD [EAX], AL
-0x00850031 0000             ADD [EAX], AL
-0x00850033 0000             ADD [EAX], AL
-0x00850035 0000             ADD [EAX], AL
-0x00850037 0000             ADD [EAX], AL
-0x00850039 0000             ADD [EAX], AL
-0x0085003b 00f8             ADD AL, BH
-0x0085003d 0000             ADD [EAX], AL
-0x0085003f 00               DB 0x0
 ```
 
 Le plugin malfind a identifié un certain nombre d'anomalie au sein du processus. Nous avons donc décidé d'extraire ces sections de mémoires afin de les analyser plus en détail.
@@ -384,3 +481,34 @@ root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 
 ```
 
 Le nom des fichiers extraits seront sous la forme ```file.[PID].[OFFSET].ext```.
+
+
+
+
+### Netscan - Lister les connexions réseaux
+
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 netscan
+
+Offset(P)          Proto    Local Address                  Foreign Address      State            Pid      Owner          Created
+0x9a0fd3350aa0     UDPv4    192.168.205.186:138            *:*                                   4        System         2020-01-16 13:22:04 UTC+0000
+0x9a0fd336a010     UDPv4    0.0.0.0:0                      *:*                                   1056     svchost.exe    2020-01-16 14:01:48 UTC+0000
+0x9a0fd336a010     UDPv6    :::0                           *:*                                   1056     svchost.exe    2020-01-16 14:01:48 UTC+0000
+0x9a0fd34f2a60     TCPv4    0.0.0.0:1098                   0.0.0.0:0            LISTENING        4168     java.exe       2020-01-16 13:23:29 UTC+0000
+0x9a0fd34f2a60     TCPv6    :::1098                        :::0                 LISTENING        4168     java.exe       2020-01-16 13:23:29 UTC+0000
+0x9a0fd34fea10     TCPv4    0.0.0.0:49727                  0.0.0.0:0            LISTENING        720      lsass.exe      2020-01-16 13:22:14 UTC+0000
+0x9a0fd34fea10     TCPv6    :::49727                       :::0                 LISTENING        720      lsass.exe      2020-01-16 13:22:14 UTC+0000
+```
+
+
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 netscan | egrep -v '(\*:\*|::1:|LISTENING)'
+
+Offset(P)          Proto    Local Address                  Foreign Address      State            Pid      Owner          Created
+0x9a0fd5432d00     TCPv4    192.168.205.186:49769          192.168.205.180:4444 CLOSED           3664     rundll32.exe   2020-01-16 13:25:15 UTC+0000
+0x9a0fd5c98730     TCPv4    192.168.205.186:8080           192.168.205.180:35146 CLOSED           4168     java.exe       2020-01-16 13:25:03 UTC+0000
+0x9a0fd5cd2010     TCPv4    192.168.205.186:49768          192.168.205.180:4444 CLOSED           5856     rundll32.exe   2020-01-16 13:25:09 UTC+0000
+0x9a0fd5e86a40     TCPv4    192.168.205.186:8080           192.168.205.180:35132 CLOSED           4168     java.exe       2020-01-16 13:24:23 UTC+0000
+```
