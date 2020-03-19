@@ -197,6 +197,7 @@ INFO    : volatility.debug    : Determining profile based on KDBG search...
            Image date and time : 2020-01-16 14:01:48 UTC+0000
      Image local date and time : 2020-01-16 06:01:48 -0800
 ```
+
 ### 1. Identification de processus suspects
 
 Comment détecter un processus non légitimes ? \\
@@ -286,7 +287,7 @@ Avant de commencer une analyse approfondie du dump mémoire, il peut être très
 Le plugin "procdump" va nous permettre d'extraire les processus en cours d'exécution. Les arguments "-u" et "--memory" permettront d'obtenir plus d'informations relatives aux processus. 
 
 ```
-root@kali# volatility -f ./JbossServer_memory.vmem --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000  procdump -u --memory -D /root/Desktop/procdump
+root@kali# volatility -f ./JbossServer_memory.vmem --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000  procdump -u --memory -D ./procdump
 
 root@kali# clamscan --infected  --suppress-ok-results ./procdump/
 ..
@@ -468,50 +469,12 @@ Ensuite, nous pouvons les uploader sur la plateforme "Virustotal" afin d'obtenir
 {{ :forensic:volatility_malfind_virustotal.png?nolink |}}
 
 
-### Filescan - Lister les fichiers
-
-Si lors de l'analyse vous avez un doute sur un fichier ou binaire. Il est possible de parcourir la $MFT "Master File Table" afin d'obtenir son "physical offset" nécessaire pour son extraction future.
-
-```
-root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 filescan
-```
-
-
-### Dumpfiles - Extraction de fichiers
-
-Grâce au plugin dumpfiles de Volatility, il est très facile d'extraire un fichier suspect d'un prélévement mémoire. 
-Comment fonctionne t'il?
-Il va parcourir la "Process Handle Table" et l'arbre "Virtual Adress Descriptor/VAD" à la recherche d'objet de type fichier "File_Objects". Une fois ces objets identifiés, le plugin analysera les 3 données "ImageSectionObject", "DataSectionObject" et "SharedCachedMap" nécessaire à l'extraction.
-
-
-```
-root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 dumpfiles -n --dump-dir=./dumpfiles/
-```
-
-Une fois la commande terminée, les fichiers extraits seront disponibles dans le répertoire "./dumpfiles/".
-
-Voici quelques options utiles : 
-
-* **-n** : qui permet d'otbenir les fichiers extraits avec leur nom original
-* **-i** : n'utilise pas la casse pour effectuer la recherche
-* **-r** : permet d'utiliser une regex afin d'extraire par exemple des fichiers ayant la même extension
-
-Avec cette dernière option, il devient possible d'extraire des fichiers dont le nom correspond à une expression régulière.
-
-```
-root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 dumpfiles -n -i -r \\.exe --dump-dir=./dumpfiles/
-```
-
-Le nom des fichiers extraits seront sous la forme ```file.[PID].[OFFSET].ext```.
-
-
-
 
 ### Netscan - Lister les connexions réseaux
 
 
 ```
-root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 netscan
+root@kali# volatility -f ../JbossServer_memory.vmem netscan
 
 Offset(P)          Proto    Local Address                  Foreign Address      State            Pid      Owner          Created
 0x9a0fd3350aa0     UDPv4    192.168.205.186:138            *:*                                   4        System         2020-01-16 13:22:04 UTC+0000
@@ -526,9 +489,9 @@ Offset(P)          Proto    Local Address                  Foreign Address      
 
 
 ```
-# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 netscan | egrep -v '\*:\*|127\.0\.0\.1|0\.0\.0\.0:0'
+# volatility -f ../JbossServer_memory.vmem  netscan | egrep -v '\*:\*|127\.0\.0\.1|0\.0\.0\.0:0'
 
-# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 netscan | egrep -v '(\*:\*|::1:|LISTENING)'
+# volatility -f ../JbossServer_memory.vmem  netscan | egrep -v '(\*:\*|::1:|LISTENING)'
 
 Offset(P)          Proto    Local Address                  Foreign Address      State            Pid      Owner          Created
 0x9a0fd5432d00     TCPv4    192.168.205.186:49769          192.168.205.180:4444 CLOSED           3664     rundll32.exe   2020-01-16 13:25:15 UTC+0000
@@ -536,3 +499,82 @@ Offset(P)          Proto    Local Address                  Foreign Address      
 0x9a0fd5cd2010     TCPv4    192.168.205.186:49768          192.168.205.180:4444 CLOSED           5856     rundll32.exe   2020-01-16 13:25:09 UTC+0000
 0x9a0fd5e86a40     TCPv4    192.168.205.186:8080           192.168.205.180:35132 CLOSED           4168     java.exe       2020-01-16 13:24:23 UTC+0000
 ```
+
+
+### 2. Analyse de la timeline
+
+#### 2.1 Génération de la timeline
+
+Au même titre que la timeline générée à partir d'une image disque, il est possible d'obtenir un résultat similaire à partir d'un dump mémoire.
+Les plugins "timeliner", "mftparser" et "shellbags" permettent d'enregistrer leur résultat dans des fichiers de type "bodyfile" qui pourront être traités par mactime (un outil de la suite de sleuthkit).
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem timeliner --output=body > Evidence1-timeliner.body
+root@kali# volatility -f ../JbossServer_memory.vmem mftparser --output=body > Evidence1-mftparser.body
+root@kali# volatility -f ../JbossServer_memory.vmem shellbags --output=body > Evidence1-shellbags.body
+```
+
+Les fichiers obtenus vont être concaténés puis traités pour obtenir une timeline au format CSV.
+
+```
+root@kali# cat Evidence1-timeliner.body >> Evidence1-bodyfile
+root@kali# cat Evidence1-mftparser.body >> Evidence1-bodyfile
+root@kali# cat Evidence1-shellbags.body >> Evidence1-bodyfile
+root@kali# sort Evidence1-bodyfile | uniq > dedup-Evidence1-bodyfile
+
+root@kali# mactime -z UTC -y -d -b dedup-Evidence1-bodyfile 2012-04-02..2012-04-07 > Evidence1-mactime-timeline.csv
+```
+
+La période de temps ici utilisée n'est qu'un exemple pour montrer la faisabilité d'en spécifier une.
+
+La timeline peut également être traitée par log2timeline pour être ensuite envoyé dans la ELK.
+
+```
+root@kali# log2timeline.py -f filter_windows.txt --volumes all --partitions all --no_dependencies_check --data /opt/secubian/tools/dfir_disk/plaso/data volatility-timeliner.plaso Evidence1-timeliner.body
+
+## Création de l'index
+root@kali# curl -XPUT "http://127.0.0.1:9200/volatility-timeliner"
+root@kali# psort.py -z UTC -o elastic --server 127.0.0.1 --port 9200 --raw_fields --index_name timeline-json --data /opt/secubian/tools/dfir_disk/plaso/data volatility-timeliner.plaso
+```
+
+#### 2.2 Extraction de fichiers
+
+##### Filescan - Lister les fichiers
+
+Si lors de l'analyse vous avez un doute sur un fichier ou binaire. Il est possible de parcourir la $MFT "Master File Table" afin d'obtenir son "physical offset" nécessaire pour son extraction future.
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  filescan
+```
+
+
+##### Dumpfiles - Extraction de fichiers
+
+Grâce au plugin dumpfiles de Volatility, il est très facile d'extraire un fichier suspect d'un prélévement mémoire. 
+Comment fonctionne t'il?
+Il va parcourir la "Process Handle Table" et l'arbre "Virtual Adress Descriptor/VAD" à la recherche d'objet de type fichier "File_Objects". Une fois ces objets identifiés, le plugin analysera les 3 données "ImageSectionObject", "DataSectionObject" et "SharedCachedMap" nécessaire à l'extraction.
+
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  dumpfiles -n --dump-dir=./dumpfiles/
+```
+
+Une fois la commande terminée, les fichiers extraits seront disponibles dans le répertoire "./dumpfiles/".
+
+Voici quelques options utiles : 
+
+* **-n** : qui permet d'otbenir les fichiers extraits avec leur nom original
+* **-i** : n'utilise pas la casse pour effectuer la recherche
+* **-r** : permet d'utiliser une regex afin d'extraire par exemple des fichiers ayant la même extension
+
+Avec cette dernière option, il devient possible d'extraire des fichiers dont le nom correspond à une expression régulière.
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  dumpfiles -n -i -r \\.exe --dump-dir=./dumpfiles/
+```
+
+Le nom des fichiers extraits seront sous la forme ```file.[PID].[OFFSET].ext```.
+
+
+
+
