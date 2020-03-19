@@ -280,8 +280,30 @@ Voici quelques processus systèmes légitimes sur un système d'exploitation Mic
  * Utilisateur executant le processus : local system
 
 
+#### 1.1 Analyse antivirus des processus
 
-#### 1.1 Lister les processus
+Avant de commencer une analyse approfondie du dump mémoire, il peut être très efficace d'effectuer une analyse antivirus des processus en cours d'exécution lors de l'acquisition de la mémoire. L'antivirus Clamav n'est pas parfait peut aider l'équipe d'analystes.
+Le plugin "procdump" va nous permettre d'extraire les processus en cours d'exécution. Les arguments "-u" et "--memory" permettront d'obtenir plus d'informations relatives aux processus. 
+
+```
+root@kali# volatility -f ./JbossServer_memory.vmem --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000  procdump -u --memory -D /root/Desktop/procdump
+
+root@kali# clamscan --infected  --suppress-ok-results ./procdump/
+..
+..
+----------- SCAN SUMMARY -----------
+Known viruses: 6768074
+Engine version: 0.102.2
+Scanned directories: 1
+Scanned files: 79
+Infected files: 0
+Data scanned: 45.97 MB
+Data read: 44.19 MB (ratio 1.04:1)
+Time: 48.212 sec (0 m 48 s)
+```
+
+
+#### 1.2 Lister les processus
 
 Une des premières action à mener lors d'une investigation numérique est de lister les processus afin d'identifier d'éventuels processus suspects.
 Chaque processus a son environnement propre nommé **Process Environment Block (PEB)**. Y sont stockées les données telles que le chemin ou se trouve le binaire, les éventuels arguments ainsi que les DLLs nécessaires à son exécution. 
@@ -289,7 +311,7 @@ Chaque processus a son environnement propre nommé **Process Environment Block (
 Plusieurs plugins sont disponibles (pslist, pstree, etc). Ils vont ainsi parcourir la liste liant les structures **EPROCESS** de chacun des processus et les afficher à l'écran. \\
 J'ai une preference pour "pstree" qui organise les processus par lien de parenté.
 
-##### 1.1.1 Pslist
+##### 1.2.1 Pslist
 
 Ce plugin comme évoqué ci-dessus va parcourir la liste liant les structures **EPROCESS** des processus. \\
 Il affichera entre autre en résultat :
@@ -321,7 +343,7 @@ root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 
 ```
 
 
-##### 1.1.2 Pstree
+##### 1.2.2 Pstree
 
 ```
 root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 pstree
@@ -337,7 +359,7 @@ root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 
 .......... 0xffff9a0fd6090080:rundll32.exe           5856   5844      2      0 2020-01-16 13:25:09 UTC+0000
 ```
 
-##### 1.1.3 Psscan
+##### 1.2.3 Psscan
 
 Le plugin psscan utilise un procédé différent pour lister les processus. 
 Il va parcourir la mémoire à la recherche de structure **EPROCESS**. Cette méthode permettra notamment d'identifier des processus ayant été exécuté et désormais terminé.
@@ -504,7 +526,9 @@ Offset(P)          Proto    Local Address                  Foreign Address      
 
 
 ```
-root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 netscan | egrep -v '(\*:\*|::1:|LISTENING)'
+# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 netscan | egrep -v '\*:\*|127\.0\.0\.1|0\.0\.0\.0:0'
+
+# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 netscan | egrep -v '(\*:\*|::1:|LISTENING)'
 
 Offset(P)          Proto    Local Address                  Foreign Address      State            Pid      Owner          Created
 0x9a0fd5432d00     TCPv4    192.168.205.186:49769          192.168.205.180:4444 CLOSED           3664     rundll32.exe   2020-01-16 13:25:15 UTC+0000
