@@ -332,27 +332,6 @@ Chaque processus a son environnement propre nommé **Process Environment Block (
 
 {{ :forensic:eprocess_2.png?nolink |}}
 
-\\ \\
-La structure ```_PEB_LDR_DATA``` contient les pointeurs vers les modules chargés en mémoire pour l’exécution du processus. Ces pointeurs correspondent à des adresses au sein de la table ```_LDR_DATA_TABLE_ENTRY```.
-
-* InLoadOrderModuleList : Liste des modules chargés dans l'ordre de chargement.
-* InMemoryOrderModuleList : Liste des modules chargés dans leur ordre croissant d’ImageBase. 
-* InInitializationOrderModuleList : Liste des modules chargés classés dans l'ordre d’initialisation. Cette liste est différente de la InLoadOrderModuleList parcequ’une DLL est initialisé uniquement lorsque ses imports sont complets. Dans certains cas il est nécessaire de charger et d’initialiser d’autres DLLs avant la nôtre. 
-
-Source : https://www.ivanlef0u.tuxfamily.org/?p=365
-
-{{ :forensic:eprocess_3.png?nolink |}}
-
-\\ \\
-La structure ```_LDR_DATA_TABLE_ENTRY``` contient toutes les informations
-des modules chargés pour l’exécution d’un processus. Ces modules peuvent être soit des Drivers (Kernel Module), soit des Dlls (chargées dans le User Mode).
-
-* DllBase : Adresse Mémoire de base de la DLL
-* EntryPoint : Point d’entrée de la DLL.
-* SizeOfImage : Taille de la DLL en mémoire 
-* FullDllName : Chemin complet de la DLL
-* TimeDateStamp : L’horodatage de compilation pour la DLL
-
 
 
 ##### 1.2.1 Pslist
@@ -551,8 +530,30 @@ Le résultat de chacun des tests effectués peut avoir comme valeur : True / Fal
 * PHollow : mise en avant de binaire n'étant pas répertorié "unmapped process"
 * SPath : Identification des binaires exécutés à partir de repertoire suspect "Temp, Recycle Bin, .."
 
+#### 1.4 Analyse des DLLs chargées par les processus
 
-#### Dlllist - Analyse des DLLs chargées par les processus
+La structure ```_PEB_LDR_DATA``` évoquée précédemment contient les pointeurs vers les modules chargés en mémoire pour l’exécution du processus. Ces pointeurs correspondent à des adresses au sein de la table ```_LDR_DATA_TABLE_ENTRY```.
+
+* InLoadOrderModuleList : Liste des modules chargés dans l'ordre de chargement.
+* InMemoryOrderModuleList : Liste des modules chargés dans leur ordre croissant d’ImageBase. 
+* InInitializationOrderModuleList : Liste des modules chargés classés dans l'ordre d’initialisation. Cette liste est différente de la InLoadOrderModuleList parcequ’une DLL est initialisé uniquement lorsque ses imports sont complets. Dans certains cas il est nécessaire de charger et d’initialiser d’autres DLLs avant la nôtre. 
+
+Source : https://www.ivanlef0u.tuxfamily.org/?p=365
+
+{{ :forensic:eprocess_3.png?nolink |}}
+
+
+La structure ```_LDR_DATA_TABLE_ENTRY``` contient toutes les informations
+des modules chargés pour l’exécution d’un processus. Ces modules peuvent être soit des Drivers (Kernel Module), soit des Dlls (chargées dans le User Mode).
+
+* DllBase : Adresse Mémoire de base de la DLL
+* EntryPoint : Point d’entrée de la DLL.
+* SizeOfImage : Taille de la DLL en mémoire 
+* FullDllName : Chemin complet de la DLL
+* TimeDateStamp : L’horodatage de compilation pour la DLL
+
+
+##### 1.4.1 Dlllist 
 
 Ce plugin va lister les différentes Dlls qui sont chargées par chacun des processus.
 Il est ainsi possible d'identifier très rapidement une DLL chargée lors d'une intrusion sur un système d'information.
