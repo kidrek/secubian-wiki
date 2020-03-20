@@ -530,9 +530,9 @@ Le résultat de chacun des tests effectués peut avoir comme valeur : True / Fal
 * PHollow : mise en avant de binaire n'étant pas répertorié "unmapped process"
 * SPath : Identification des binaires exécutés à partir de repertoire suspect "Temp, Recycle Bin, .."
 
-#### 1.4 Analyse des DLLs chargées par les processus
+#### 1.4 Analyse des DLLs/Modules chargées par les processus
 
-La structure ```_PEB_LDR_DATA``` évoquée précédemment contient les pointeurs vers les modules chargés en mémoire pour l’exécution du processus. Ces pointeurs correspondent à des adresses au sein de la table ```_LDR_DATA_TABLE_ENTRY```.
+La structure ```_PEB_LDR_DATA``` évoquée précédemment contient les pointeurs vers les modules/Dlls chargés en mémoire pour l’exécution du processus. Ces pointeurs correspondent à des adresses au sein de la table ```_LDR_DATA_TABLE_ENTRY```.
 
 * InLoadOrderModuleList : Liste des modules chargés dans l'ordre de chargement.
 * InMemoryOrderModuleList : Liste des modules chargés dans leur ordre croissant d’ImageBase. 
@@ -576,9 +576,27 @@ Base                             Size          LoadCount LoadTime               
 0x00000000738e0000             0x5000                0x6 2020-01-16 13:25:03 UTC+0000   \\192.168.205.180\XzmKO\inject.dll
 ```
 
+##### 1.4.2 Modules 
 
+Le plugin "modules" va parcourir la double liste chainée et afficher les données provenant de la structure ```LDR_DATA_TABLE_ENTRY``` (**PsLoadedModuleList**).
 
+```
+root@kali# volatility  -f ./JbossServer_memory.vmem --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 modules     
+Volatility Foundation Volatility Framework 2.6.1
+Offset(V)          Name                 Base                             Size File
+------------------ -------------------- ------------------ ------------------ ----
+0xffff9a0fd32376c0 ntoskrnl.exe         0xfffff80378c1d000           0x820000 \SystemRoot\system32\ntoskrnl.exe
+0xffff9a0fd3237540 hal.dll              0xfffff8037943d000            0x75000 \SystemRoot\system32\hal.dll
+0xffff9a0fd32373d0 kdcom.dll            0xfffff80377c48000             0xb000 \SystemRoot\system32\kd.dll
+0xffff9a0fd3237250 mcupdate.dll         0xfffff806a52e0000            0x8e000 \SystemRoot\system32\mcupdate_GenuineIntel.dll
+0xffff9a0fd3236010 werkernel.sys        0xfffff806a5370000            0x10000 \SystemRoot\System32\drivers\werkernel.sys
+0xffff9a0fd3236ea0 CLFS.SYS             0xfffff806a5380000            0x63000 \SystemRoot\System32\drivers\CLFS.SYS
+0xffff9a0fd3236d40 tm.sys               0xfffff806a4a00000            0x25000 \SystemRoot\System32\drivers\tm.sys
+```
 
+Il est important de garder à l'esprit que si un processus ne fait pas partie des listes chainees "FLINK" et "BLINK", ses modules/Dlls n'apparaitront pas dans le résultat ci-dessus. 
+
+##### 1.4.3 Modscan 
 
 
 ### Netscan - Lister les connexions réseaux
