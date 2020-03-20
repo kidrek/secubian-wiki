@@ -11,15 +11,3 @@ SecuBian se veut ainsi un outil permettant de faciliter les audits de cyber-séc
 
 //Secuip, Kidrek//
 
-
-### Les outils
-La distribution Secubian intègre une multitude d'outils utilisés lors d'une réponse à incident.
-
-* **TheHive**
- * URL : https://127.0.0.1:9443
- * Déployable via le script ```thehive-deploy```
- * La solution est accessible après avoir exécuté le script ```thehive-start```
-
-
-
-

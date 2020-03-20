@@ -1,0 +1,42 @@
+====== Les outils disponibles ======
+
+La distribution Secubian intègre une multitude d'outils indispensables aux analystes lors d'une réponse à incident.
+
+
+
+===== Dockers =====
+
+Certains éditeurs de logiciels fournissent les dockers propre à leur solution. \\
+Nous avons donc décidé de les intégrer au sein du système SECUBIAN.
+
+* **ELK Suite** : La suite ELK est indispensable pour analyser les données extraites et/ou traitées (envoyées par psort) durant une investigation. 
+ * Elasticsearch URL : http://127.0.0.1:9200
+ * Kibana URL : http://127.0.0.1:5601
+ * Déployable via le script ```elk-deploy```
+ * La solution est accessible après avoir exécuté le script ```elk-start```
+
+\\
+
+* **TheHive** : est un produit OpenSource dédié à la gestion de la conduite d'un incident. Il permet ainsi d'avoir un suivit des actions réalisées et à entreprendre par les analystes.
+ * URL : https://127.0.0.1:9443
+ * Déployable via le script ```thehive-deploy```
+ * La solution est accessible après avoir exécuté le script ```thehive-start```
+
+
+===== Outils =====
+
+* **Cyberchef** : Outil intégré au système Secubian qui vous permettra d'effectuer de nombreuses manipulations de chaînes de caractères. L'outil est accessible dans les "Favoris" de Firefox. 
+
+* **ElastAlert** : est un produit OpenSource permettant d'effectuer des requêtes sur les données d'un index d'une instance Elasticsearch à la recherche d'IOC/de comportement malveillant.
+
+
+===== Outils Secubian =====
+
+Quelques scripts personnalisés ont été créés afin de faciliter l'usage de certaines fonctionnalités.
+
+
+* **secubian-vmware-share-automount** : a été créé pour monter facilement les partages Vmware (Attention !! Veillez à ne pas mettre d'espace dans le nom des partages)
+
+* **secubian-wiki-update** : permet de maintenir à jour le wiki interne accessible à l'URL : [[http://127.0.0.1|Wiki Secubian]].
+
+
