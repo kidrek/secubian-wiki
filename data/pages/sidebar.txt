@@ -3,6 +3,12 @@
 
   * [[Secubian:tools|Outils disponibles]]
 
+====== Méthodologies ======
+
+  * [[Methodologies:ReponseIncident|Réponse à incident]]
+  * [[Methodologies:Pentest|Pentest]]
+
+
 
 ====== Forensic Linux ======
 
