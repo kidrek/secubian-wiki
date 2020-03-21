@@ -17,6 +17,14 @@ Nous avons donc décidé de les intégrer au sein du système SECUBIAN.
 
 \\
 
+* **LogonTracer** : Développé par le CERT Japonnais, LogonTracer représente sous forme de graphes les connexions/authentification au sein d'un système Windows. Fonctionnant au sein d'un docker, il n'a besoin que du fichier "SECURITY.EVTX" d'une machine provenant de votre périmètre d'analyse. Il intègre de nombreux filtres qui aideront les analystes à détecter d’éventuelles connexions/authentifications non légitimes.
+ * Web URL : https://github.com/JPCERTCC/LogonTracer
+ * Docker URL : http://127.0.0.1:8080
+ * Déployable via le script ```logontracer-deploy```
+ * La solution est accessible après avoir exécuté le script ```logontracer-start```
+
+\\
+
 * **TheHive** : est un produit OpenSource dédié à la gestion de la conduite d'un incident. Il permet ainsi d'avoir un suivit des actions réalisées et à entreprendre par les analystes.
  * URL : https://127.0.0.1:9443
  * Déployable via le script ```thehive-deploy```
