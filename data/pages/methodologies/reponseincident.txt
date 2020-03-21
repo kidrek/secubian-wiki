@@ -1,2 +1,10 @@
 
-# Comment mener une réponse à incident ?
+# Méthodologie pour conduire une réponse à incident
+
+Il est toujours difficile de gérer un incident lorsqu'il survient. \\
+Voici quelques étapes qui permettront de se préparer et mener au mieux la reprise en main de notre système d'information. \\
+{{ :methodologies:methodo_reponse_incident.pdf | Version PDF}}
+
+\\
+
+{{ :methodologies:methodo_reponse_incident.png?nolink |}}
