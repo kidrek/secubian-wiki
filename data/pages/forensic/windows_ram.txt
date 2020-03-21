@@ -530,9 +530,9 @@ Le résultat de chacun des tests effectués peut avoir comme valeur : True / Fal
 * PHollow : mise en avant de binaire n'étant pas répertorié "unmapped process"
 * SPath : Identification des binaires exécutés à partir de repertoire suspect "Temp, Recycle Bin, .."
 
-#### 1.4 Analyse des DLLs/Modules chargées par les processus
+#### 1.4 Analyse des DLLs/Modules chargés par les processus
 
-La structure ```_PEB_LDR_DATA``` évoquée précédemment contient les pointeurs vers les modules/Dlls chargés en mémoire pour l’exécution du processus. Ces pointeurs correspondent à des adresses au sein de la table ```_LDR_DATA_TABLE_ENTRY```.
+La structure ```_PEB_LDR_DATA``` évoquée précédemment dans la section dédiée à l'identification des processus, contient au sein de listes des pointeurs vers les modules/Dlls nécessaires à l'exécution du processus. 
 
 * InLoadOrderModuleList : Liste des modules chargés dans l'ordre de chargement.
 * InMemoryOrderModuleList : Liste des modules chargés dans leur ordre croissant d’ImageBase. 
@@ -542,9 +542,8 @@ Source : https://www.ivanlef0u.tuxfamily.org/?p=365
 
 {{ :forensic:eprocess_3.png?nolink |}}
 
-
-La structure ```_LDR_DATA_TABLE_ENTRY``` contient toutes les informations
-des modules chargés pour l’exécution d’un processus. Ces modules peuvent être soit des Drivers (Kernel Module), soit des Dlls (chargées dans le User Mode).
+Les pointeurs présents au sein de ces listes correspondent à des entrées au sein de la structure ```_LDR_DATA_TABLE_ENTRY```.
+On y trouve toutes les informations relatives aux modules chargés. Ces modules peuvent être des Drivers (Kernel Module), comme des Dlls (chargées dans le User Mode).
 
 * DllBase : Adresse Mémoire de base de la DLL
 * EntryPoint : Point d’entrée de la DLL.
@@ -578,7 +577,7 @@ Base                             Size          LoadCount LoadTime               
 
 ##### 1.4.2 Modules 
 
-Le plugin "modules" va parcourir la double liste chainée et afficher les données provenant de la structure ```LDR_DATA_TABLE_ENTRY``` (**PsLoadedModuleList**).
+Le plugin "modules" va parcourir la double liste chainée des processus et afficher les données provenant de la structure ```LDR_DATA_TABLE_ENTRY``` (**PsLoadedModuleList**).
 
 ```
 root@kali# volatility  -f ./JbossServer_memory.vmem --profile=Win2016x64_14393 --kdbg=0xf80378f0d500 --dtb=0x1ab000 modules     
