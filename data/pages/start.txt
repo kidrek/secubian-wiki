@@ -9,5 +9,9 @@ SecuBian est une distribution GNU/Linux basée sur **Debian**. Sa principale voc
 
 SecuBian se veut ainsi un outil permettant de faciliter les audits de cyber-sécurité, les tests d'intrusions mais aussi les analyses inforensiques permettant de restaurer et comprendre l'origine de défaillance système faisant suite à des pannes matérielles, à des infections virales ou à des attaques par des individus mal intentionnés.
 
+La distribution basée sur Kali et intégrant ce wiki est disponible ici : 
+{{ :secubian_2020.iso | ISO Secubian}}
+
+
 //Secuip, Kidrek//
 
