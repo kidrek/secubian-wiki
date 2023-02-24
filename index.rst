@@ -16,16 +16,7 @@ Documentation
 Voici un receuil de la documentation relative aux outils intégrés au sein de la distribution Secubian. 
 De plus, vous trouverez de la documentation générale liée aux domaines de la cybersécurité.
 
-L'ensemble des outils sont recensés :   `ici <./liste_outils.html>`_
-
-
-.. toctree::
-   :hidden:
-   :maxdepth: 2
-   :caption: // Investigation Numérique
-
-   DFIR/dfir_iris_web.md
-   DFIR/timesketch.md
+L'ensemble des outils sont recensés :   `ici <./outils/liste_outils.html>`_  
 
 
 Créateurs   
@@ -33,3 +24,19 @@ Créateurs
 
 - Winston DELBEY
 - Cédric MAURUGEON
+
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: // Investigation Numérique
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: // Outils
+
+   outils/liste_outils.md
+   outils/dfir_iris_web.md
+   outils/timesketch.md
+
