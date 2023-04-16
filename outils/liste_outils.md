@@ -28,6 +28,7 @@ Ces derniers sont regroupés par catégorie.
 * libewf-dev
 * libguestfs-tools
 * libvshadow-utils
+* [log2timeline et plaso](log2timeline_plaso)
 * python3-ssdeep
 * scalpel
 * sleuthkit

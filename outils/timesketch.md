@@ -15,3 +15,13 @@ Les informations d'authentification par défaut sont les suivantes :
 - Mot de passe : ```secubian```
 
 Je vous encourage à les changer lors de son utilisation.
+
+- Source : https://timesketch.org/
+- Documentation : https://timesketch.org/guides/user/
+
+
+La solution a pas mal évolué ces derniers mois.
+Voici quelques exemples de requêtes pouvant être utilisée : ```data_type:"windows:evtx:record" AND event_identifier:4624 AND xml_string:"/LogonType\"\>3/" AND datetime:[2021-08-29 TO 2021-08-31]```
+(source : https://timesketch.org/guides/user/search-query-guide/)
+
+
