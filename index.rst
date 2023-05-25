@@ -31,6 +31,8 @@ Créateurs
    :maxdepth: 2
    :caption: // Investigation Numérique
 
+   documentations/vmware.md
+
 .. toctree::
    :hidden:
    :maxdepth: 2
