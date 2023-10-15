@@ -48,6 +48,7 @@ Créateurs
 
    outils/liste_outils.md
    outils/dfir_iris_web.md
+   outils/firefox.md
    outils/log2timeline_plaso.md
    outils/timesketch.md
 
