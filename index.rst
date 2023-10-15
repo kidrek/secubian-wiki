@@ -29,6 +29,14 @@ Créateurs
 .. toctree::
    :hidden:
    :maxdepth: 2
+   :caption: // Méthodologies & Playbooks
+
+   playbooks/introduction.md
+
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
    :caption: // Investigation Numérique
 
    documentations/vmware.md
