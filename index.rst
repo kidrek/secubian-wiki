@@ -51,4 +51,5 @@ Créateurs
    outils/firefox.md
    outils/log2timeline_plaso.md
    outils/timesketch.md
+   outils/velociraptor.md
 
