@@ -16,6 +16,7 @@ SECUBIAN est un projet de distribution Linux permettant de mettre à disposition
   :alt: logo
   :align: center 
 
+\
 
 Pour faciliter toutes ces phases, la distribution Linux intègre 2 projets complémentaires nommés, `secubian-wiki <https://github.com/kidrek/secubian-wiki>`_ et `secubian-JupyterNotebook <https://github.com/kidrek/secubian-JupyterNotebook>`_. Ces 2 projets, présents dans le répertoire ``$HOME/Documents`` de votre profil utilisateur, permettent d'apporter des outils, de la documentation et de la méthodologie disponibles même OFFLINE.
 
