@@ -44,17 +44,18 @@ Créateurs
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: // Méthodologies & Playbooks
+   :caption: // Méthodologies
 
-   playbooks/introduction.md
-
+   methodologies/00_introduction.md
+   methodologies/02_hdd_analyse.md
+   methodologies/vmware.md
 
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: // Investigation Numérique
+   :caption: // Playbooks
 
-   documentations/vmware.md
+   playbooks/introduction.md
 
 .. toctree::
    :hidden:
