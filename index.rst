@@ -70,3 +70,9 @@ Créateurs
    outils/timesketch.md
    outils/velociraptor.md
 
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: // Artefacts
+
+   artefacts/00_windows.md
