@@ -43,3 +43,6 @@ Voici quelques exemples de dashboard intégrés à OpenSearch présents sur la d
 - Analyse des connexions réseaux présentes sur un système d'exploitation Linux ;
  
 ![dashboard_velociraptor_linux_netstat.png](./velociraptor_img/dashboard_velociraptor_linux_netstat.png)
+
+## Références : 
+- https://medium.com/@artrebultan/velociraptor-incident-response-and-monitoring-setup-and-configuration-e5d62aed5477

@@ -98,3 +98,18 @@ Ces derniers sont regroupés par catégorie.
 * socat
 
 ## Reverse
+
+
+## Topologie réseau
+
+| Port HTTP | Port HTTPS | Outil | 
+|-----|-------------|------------|
+| 80 | - | Wiki | 
+| 5080 | 5443 | Timesketch | 
+| 6080 | 6443 | DFIR Iris | 
+| 7000 | 7443 | Draw.io | 
+| 8000, 8001, 8003 (A verifier) | 8889 | Velociraptor | 
+| 8080 | - | Homer | 
+| 8888 | - | Jupyter Notebook | 
+| 9000 | 9443 | Portainer | 
+
