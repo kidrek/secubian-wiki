@@ -23,6 +23,7 @@ Ces artefacts sont plus génériques mais permettent de retracer les différente
 | Nom | Description | Références |
 |-----|-------------|------------|
 |RecentDocs| Cet artefact retrace les derniers fichiers et répertoires accédés. |[détails](./00_windows_artefacts/registry/recentdocs.md)|
+|ShellBags| Cet artefact permet de retracer les dossiers et fichiers récemment ouverts par les utilisateurs.|[détails](./00_windows_artefacts/registry/shellbags.md)|
 |Trusted Documents| Cet artefact permet de visualiser les actions de confiances accordées à certains documents Microsoft Office (ex: execution de macro) |[détails](./00_windows_artefacts/registry/trustedDocuments.md)|
 
 
@@ -50,3 +51,6 @@ Chaque exécution de processus est journalisée de différentes manières :
 | UserAssist | Les programmes basés sur l'interface graphique lancés à partir du bureau sont suivis dans le lanceur d'un système Windows. | [détails](./00_windows_artefacts/userassist.md) |
 
 
+## Références 
+
+- https://github.com/Psmths/windows-forensic-artifacts
