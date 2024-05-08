@@ -48,7 +48,7 @@ Chaque exécution de processus est journalisée de différentes manières :
 | Prefetch |  |  |
 | Run MRU |  | [détails](./00_windows_artefacts/registry/runmru.md)  |
 | Services |  |  |
-| UserAssist | Les programmes basés sur l'interface graphique lancés à partir du bureau sont suivis dans le lanceur d'un système Windows. | [détails](./00_windows_artefacts/userassist.md) |
+| UserAssist | Les programmes basés sur l'interface graphique lancés à partir du bureau sont suivis dans le lanceur d'un système Windows. | [détails](./00_windows_artefacts/registry/userassist.md) |
 
 
 ## Références 
