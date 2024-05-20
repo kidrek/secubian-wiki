@@ -76,3 +76,4 @@ Créateurs
    :caption: // Artefacts
 
    artefacts/00_windows.md
+   artefacts/00_linux.md
