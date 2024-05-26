@@ -10,6 +10,11 @@ Il propose deux modes de fonctionnement :
 
 ![logo](./velociraptor_img/logo.svg)
 
+
+L'instance velociraptor est accessible via l'url : https://127.0.0.1:8889
+Les informations d'authentification nécessaires à l'usage de ces outils sont présentes dans la base de données keepass : ```$HOME/Documents/secubian.kdbx``` dont le mot de passe est ```secubian```.
+
+
 Voici quelques liens utils : 
 
 - la documentation : [https://docs.velociraptor.app](https://docs.velociraptor.app)

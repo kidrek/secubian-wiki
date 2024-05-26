@@ -11,6 +11,8 @@ Documentation
 
 SECUBIAN est un projet de distribution Linux permettant de mettre à disposition des équipes de réponse à incident la majorité des outils nécessaires à la collecte, le traitement et l'analyse des données nécessaires pour mener une investigation numérique.
 
+Les informations d'authentification nécessaires à l'usage de ces outils sont présentes dans la base de données keepass : ``$HOME/Documents/secubian.kdbx`` dont le mot de passe est ``secubian``.
+
 .. image:: img/desktop.png
   :width: 700
   :alt: logo
