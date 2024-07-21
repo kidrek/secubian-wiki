@@ -4,6 +4,8 @@ L'artefact "hiberfil.sys" est un fichier système présent sur les systèmes d'e
 
 Le fichier "hiberfil.sys" est généralement situé à la racine du disque dur système (généralement sous C:) et est de taille équivalente à la quantité de mémoire vive (RAM) installée sur l'ordinateur. Cela signifie que plus la quantité de RAM est importante, plus la taille du fichier "hiberfil.sys" sera grande.
 
+- Chemin de l'artefact : ```%SYSTEMDRIVE%\hiberfil.sys```
+
 Il est possible de désactiver la fonction de mise en veille prolongée dans les paramètres d'alimentation de Windows, ce qui entraînera la suppression du fichier "hiberfil.sys" et libérera de l'espace disque. Cependant, cela signifie que l'ordinateur ne pourra plus être mis en hibernation et mettra plus de temps à démarrer à chaque redémarrage.
 
 Pour activer ou désactiver hiberfil.sys dans un système d'exploitation Microsoft Windows, vous devez ouvrir une invite de commandes en tant qu'administrateur et exécuter la commande suivante :
