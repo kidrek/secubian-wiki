@@ -1,8 +1,10 @@
 # Les services
 
-Les services définis sur un système linux sont très souvent utilisés par les acteurs malveillants pour y déployer des mécanismes de persistences. Ces scripts ```systemd``` sont exécutés au démarrage du système et lors du rechargement de la configuration.
+Les services sous Linux sont des programmes qui s'exécutent en arrière-plan et fournissent des fonctionnalités spécifiques au système ou aux utilisateurs. Historiquement, les services étaient gérés par le système d'initialisation ```SystemV```. Cependant, de nombreuses distributions modernes utilisent désormais ```systemd``` comme gestionnaire de services principal. Ces derniers sont très souvent utilisés par les acteurs malveillants pour y déployer des mécanismes de persistences. 
 
-L'objectif est d'analyser ces scripts afin d'identifier l'exécution de binaire malveillant, via l'analyse de la variable ```ExecStart```.
+L'ensemble de ces scripts sont exécutés au démarrage du système mais également lors du rechargement de la configuration.
+
+L'objectif de ce post est de guider l'investigation numérique afin d'identifier l'exécution de binaire malveillant, via l'analyse notamment de la variable ```ExecStart```.
 
 ## Configuration
 Il est possible de définir ces services à plusieurs endroits au sein du système d'exploitation.

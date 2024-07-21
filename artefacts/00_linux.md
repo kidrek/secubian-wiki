@@ -1,8 +1,5 @@
 # Système d'exploitation Linux
 
-références (TO CHECK): 
-- https://www.youtube.com/watch?v=psBNrROty2w
-- https://www.linkedin.com/feed/update/urn:li:activity:7129561084562210816/
 
 ## Les artefacts systèmes
 
@@ -10,9 +7,9 @@ Ces artefacts permettent à un acteur malveillant de maintenir son emprise sur l
 
 | Type | Description | Références |
 |-----|-------------|------------|
-| modules |  | [détails](./00_linux_artefacts/modules.md) |
-| services |  | [détails](./00_linux_artefacts/services.md) |
-| tâche planifiée |  | [détails](./00_linux_artefacts/scheduled_tasks.md) |
+| modules | Les modules permettent d'apporter des fonctionnalités manquantes au kernel Linux. | [détails](./00_linux_artefacts/modules.md) |
+| services | Les services sous Linux sont des programmes qui s'exécutent en arrière-plan et fournissent des fonctionnalités spécifiques au système ou aux utilisateurs.  | [détails](./00_linux_artefacts/services.md) |
+| tâche planifiée | Les tâches planifiées sous Linux permettent d'exécuter automatiquement des commandes ou des scripts à des moments spécifiés. | [détails](./00_linux_artefacts/scheduled_tasks.md) |
 
 
 ## Les applications exécutées
@@ -28,3 +25,9 @@ Ces artefacts permettent à un acteur malveillant de maintenir son emprise sur l
 |-----|-------------|------------|
 | compte utilisateur |  | [détails](./00_linux_artefacts/user_account.md) |
 | scripts d'initialisation de session |  | [détails](./00_linux_artefacts/logon_scripts.md) |
+
+
+## Références
+
+- https://www.youtube.com/watch?v=psBNrROty2w
+- https://www.linkedin.com/feed/update/urn:li:activity:7129561084562210816/
