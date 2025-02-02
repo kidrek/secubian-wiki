@@ -59,19 +59,31 @@ Ces derniers sont regroupés par catégorie.
 
 #### Système d'exploitation - Microsoft Windows
 
-* evtxtract
-* LogonTracer
-* chainsaw
-* libevtx-utils
-* officedissector
-* oletools
-* Zircolite
+- Base de registre
+  * reglookup : Analyse d'une clé spécifique
+
+- EventLogs 
+  * evtxtract
+  * LogonTracer
+  * chainsaw
+  * libevtx-utils
+  * Zircolite
+
+- Fichier Microsoft Office
+  * officedissector
+  * oletools
 
 
 ### Rapport
 
 * DFIR IRIS Web
 
+
+## OSINT
+
+* Blackbird
+* Spiderfoot
+* TheHarvester
 
 ## Pentest
 
